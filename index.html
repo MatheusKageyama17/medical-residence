@@ -1,0 +1,669 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Compra – TIMELESS RESIDENCE</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#2C3E7A;--primary-dark:#1a2550;--primary-light:#3D52A0;--accent:#5B7FD4;--bg:#F0F4FB;--card-bg:#FFFFFF;--border:#C8D4EE;--text:#1A2240;--text-secondary:#4A5575;--success:#1A7A4A;--danger:#C0392B;--shadow:0 2px 14px rgba(44,62,122,0.10);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;}
+header{background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary-light) 100%);color:white;padding:20px 36px;display:flex;align-items:center;gap:22px;box-shadow:0 3px 12px rgba(0,0,0,0.25);}
+.logo-box{width:90px;height:65px;background:rgba(255,255,255,0.12);border:2px dashed rgba(255,255,255,0.35);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(255,255,255,0.65);text-align:center;cursor:pointer;transition:background .2s;overflow:hidden;}
+.logo-box:hover{background:rgba(255,255,255,0.2);}
+.logo-box img{width:100%;height:100%;object-fit:contain;}
+header h1{font-size:22px;font-weight:800;letter-spacing:.2px;}
+header p{font-size:12px;opacity:.75;margin-top:3px;}
+.badge-vigencia{display:inline-block;background:rgba(255,255,255,0.15);border-radius:20px;padding:3px 12px;font-size:11px;margin-top:6px;}
+.container{max-width:1020px;margin:0 auto;padding:28px 20px;}
+.card{background:var(--card-bg);border-radius:12px;box-shadow:var(--shadow);margin-bottom:22px;overflow:hidden;border:1px solid rgba(200,212,238,0.4);}
+.card-header{background:linear-gradient(90deg,var(--primary) 0%,var(--primary-light) 100%);color:white;padding:12px 20px;font-size:14px;font-weight:700;letter-spacing:.2px;}
+.card-body{padding:20px;}
+.form-row{display:grid;gap:16px;margin-bottom:16px;}
+.form-row.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.form-row.cols-2{grid-template-columns:1fr 1fr;}
+.form-row:last-child{margin-bottom:0;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--primary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:14px;color:var(--text);background:white;transition:border-color .2s,box-shadow .2s;outline:none;font-family:'Inter',sans-serif;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,127,212,0.15);}
+.field input[readonly]{background:#F3F7FC;color:var(--text-secondary);}
+.unit-info{display:none;background:#EBF2FF;border:1.5px solid var(--accent);border-radius:8px;padding:14px 18px;margin-top:12px;}
+.unit-info.visible{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.unit-info-item span{display:block;font-size:10px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.4px;}
+.unit-info-item strong{font-size:15px;color:var(--text);}
+.cond-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.cond-block{background:#F5F8FE;border-radius:8px;border:1.5px solid var(--border);overflow:hidden;}
+.cond-block h4{font-size:11px;font-weight:700;color:white;text-transform:uppercase;letter-spacing:.4px;background:var(--primary-light);padding:8px 14px;margin:0;}
+.cond-table{background:#EBF2FF;border-bottom:2px dashed var(--border);padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;}
+.cond-table-item{flex:1;min-width:80px;}
+.cond-table-item span{display:block;font-size:10px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px;}
+.cond-table-item strong{font-size:13px;color:var(--text);}
+.cond-custom{padding:10px 14px;display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;}
+.cond-custom .field{flex:1;min-width:80px;}
+.cond-custom label{display:block;font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;}
+.cond-custom input{width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;color:var(--text);background:white;transition:border-color .2s;outline:none;}
+.cond-custom input:focus{border-color:var(--accent);}
+.cond-custom input[readonly]{background:#F0F6FF;color:var(--primary);font-weight:700;}
+.live-total-bar{display:none;align-items:center;margin-top:16px;border-radius:10px;overflow:hidden;border:2px solid var(--primary);background:white;}
+.live-total-bar.visible{display:flex;flex-wrap:wrap;}
+.live-total-cell{flex:1;min-width:150px;padding:13px 18px;border-right:1px solid var(--border);text-align:center;}
+.live-total-cell:last-child{border-right:none;}
+.live-total-cell span{display:block;font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.live-total-cell strong{font-size:17px;font-weight:800;color:var(--text);}
+.live-total-cell.highlight{background:var(--primary);}
+.live-total-cell.highlight span{color:rgba(255,255,255,.75);}
+.live-total-cell.highlight strong{color:white;font-size:20px;}
+.live-total-cell.ok strong{color:var(--success);}
+.live-total-cell.warn strong{color:#D97706;}
+.live-total-cell.error strong{color:var(--danger);}
+.summary-bar{display:none;background:linear-gradient(90deg,var(--primary-dark),var(--primary));color:white;border-radius:8px;padding:14px 20px;margin-bottom:22px;}
+.summary-bar.visible{display:flex;flex-wrap:wrap;gap:6px 0;}
+.summary-item{flex:1;min-width:130px;text-align:center;padding:6px 12px;border-right:1px solid rgba(255,255,255,.2);}
+.summary-item:last-child{border-right:none;}
+.summary-item span{display:block;font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+.summary-item strong{font-size:17px;font-weight:700;}
+.btn-row{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;}
+.btn{padding:11px 24px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s,transform .1s;letter-spacing:.3px;font-family:'Inter',sans-serif;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--primary);color:white;flex:1;font-size:15px;}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-success{background:var(--success);color:white;}
+.btn-success:hover{background:#145c37;}
+.btn-outline{background:white;color:var(--primary);border:2px solid var(--primary);}
+.btn-outline:hover{background:#EBF2FF;}
+.btn-add{background:#1A7A4A;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;font-family:'Inter',sans-serif;}
+.btn-add:hover{background:#145c37;}
+.result-section{display:none;}
+.result-section.visible{display:block;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--primary);color:white;padding:10px 12px;text-align:left;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px;}
+thead th:last-child{text-align:right;}
+tbody td{padding:8px 12px;border-bottom:1px solid #E8EFF8;}
+tbody tr:hover{background:#F5F9FF;}
+tbody tr:last-child td{border-bottom:none;}
+td.money{text-align:right;font-variant-numeric:tabular-nums;}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+.badge-sinal{background:#DBEAFE;color:#1D4ED8;}
+.badge-mensal{background:#D1FAE5;color:#065F46;}
+.badge-interm{background:#FEF3C7;color:#92400E;}
+.badge-quitacao{background:#FFE4E6;color:#9F1239;}
+tfoot td{padding:10px 12px;font-weight:700;background:#EBF2FF;border-top:2px solid var(--primary);font-size:13px;}
+tfoot td.money{text-align:right;color:var(--primary);font-size:15px;}
+.disclaimer{font-size:11px;color:var(--text-secondary);background:#F8FAFC;border-left:3px solid var(--border);padding:10px 14px;border-radius:0 6px 6px 0;margin-top:16px;line-height:1.6;}
+.unit-list-section{margin-top:0;}
+.unit-list-section.visible{display:block;}
+.unit-list-section:not(.visible){display:none;}
+.unit-card{background:#F5F8FE;border:1.5px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+.unit-card-info{flex:1;}
+.unit-card-title{font-weight:700;color:var(--primary);font-size:14px;}
+.unit-card-detail{font-size:12px;color:var(--text-secondary);margin-top:3px;}
+.unit-card-remove{background:none;border:1.5px solid var(--danger);color:var(--danger);border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;padding:5px 10px;transition:background .2s;}
+.unit-card-remove:hover{background:#FFE4E6;}
+.consolidated-summary{background:linear-gradient(90deg,#1a2550,var(--primary));color:white;border-radius:10px;padding:18px 20px;margin-bottom:22px;}
+.consolidated-summary h3{font-size:13px;font-weight:700;margin-bottom:12px;opacity:.9;text-transform:uppercase;letter-spacing:.4px;}
+.consol-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.consol-cell{background:rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;text-align:center;}
+.consol-cell span{display:block;font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+.consol-cell strong{font-size:16px;font-weight:800;}
+.consolidated-print{display:none;}
+@media print{
+body{background:white;font-size:11px;}
+header{background:#2C3E7A !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:10px 20px;}
+.container{max-width:100%;padding:8px 14px;}
+.card{box-shadow:none;border:1px solid #CBD8EA;page-break-inside:avoid;margin-bottom:10px;}
+.card-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px 16px;font-size:13px;}
+.card-body{padding:12px 16px;}
+.no-print,.btn-row,#liveTotalBar,#pctWarning,#summaryBar,#resultSection,#cardCorretor{display:none !important;}
+.print-only{display:block !important;}
+.print-only-flex{display:flex !important;}
+.cond-block h4{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.unit-info.visible{display:grid !important;}
+.print-total-bar{display:flex !important;align-items:center;background:#2C3E7A;color:white;border-radius:8px;padding:12px 20px;margin-top:10px;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.print-total-bar span{font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:.4px;}
+.print-total-bar strong{font-size:22px;font-weight:800;}
+.signature-section{display:flex !important;gap:40px;margin-top:36px;padding-top:16px;}
+.signature-block{flex:1;text-align:center;}
+.signature-line{border-top:1.5px solid #2C3E7A;margin-bottom:6px;}
+.signature-block p{font-size:11px;color:#4A5575;}
+.signature-block .sig-label{font-weight:700;color:#2C3E7A;font-size:12px;margin-top:4px;}
+.disclaimer{font-size:10px;margin-top:10px;}
+.badge{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+table{font-size:10px;}
+td,th{padding:5px 8px !important;}
+.consolidated-print{display:block !important;page-break-before:always;}
+.consolidated-print h3{background:#2C3E7A;color:white;padding:8px 14px;font-size:13px;border-radius:6px 6px 0 0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.unit-list-section{display:none !important;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-box" id="logoBox" onclick="document.getElementById('logoInput').click()" title="Clique para trocar a logo">
+    <span>LOGO</span>
+  </div>
+  <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="loadLogo(event)">
+  <div>
+    <h1>Simulador de Compra – TIMELESS RESIDENCE</h1>
+    <p>Endereço: Rua Tanzania, Jardim Aclimatação · CBMC Incorporadora</p>
+    <span class="badge-vigencia">Tabela de Vendas · Vigência: 31/05/2026</span>
+  </div>
+</header>
+<div class="container">
+  <div class="card no-print" id="cardCorretor">
+    <div class="card-header">Dados do Corretor</div>
+    <div class="card-body">
+      <div class="form-row cols-3">
+        <div class="field"><label>Gestor</label><input type="text" id="gestorHVM" placeholder="Nome do gestor"></div>
+        <div class="field"><label>Imobiliária / Corretor</label><input type="text" id="imobiliaria" placeholder="Nome da imobiliária ou corretor"></div>
+        <div class="field"><label>CRECI</label><input type="text" id="creci" placeholder="Número CRECI"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">Dados do Proponente</div>
+    <div class="card-body">
+      <div class="form-row cols-3">
+        <div class="field"><label>Nome do Proponente</label><input type="text" id="nomeProponente" placeholder="Nome completo"></div>
+        <div class="field"><label>CPF / CNPJ</label><input type="text" id="cpf" placeholder="000.000.000-00"></div>
+        <div class="field"><label>Telefone</label><input type="text" id="telefone" placeholder="(00) 00000-0000"></div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="field"><label>E-mail</label><input type="email" id="email" placeholder="email@exemplo.com"></div>
+        <div class="field"><label>Data da Proposta</label><input type="date" id="dataProposta"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">Seleção de Unidade</div>
+    <div class="card-body">
+      <div class="form-row cols-2">
+        <div class="field">
+          <label>Andar</label>
+          <select id="selAndar" onchange="updateUnidades()">
+            <option value="">— Selecione o andar —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Unidade</label>
+          <select id="selUnidade" onchange="onUnidadeSelected()" disabled>
+            <option value="">— Selecione a unidade —</option>
+          </select>
+        </div>
+      </div>
+      <div class="unit-info" id="unitInfo">
+        <div class="unit-info-item"><span>Área Privativa</span><strong id="infoArea">–</strong></div>
+        <div class="unit-info-item"><span>Área Total</span><strong id="infoAreaTotal">–</strong></div>
+        <div class="unit-info-item"><span>Vagas</span><strong id="infoVagas">–</strong></div>
+        <div class="unit-info-item"><span>Valor Total</span><strong id="infoValor">–</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">Condições de Pagamento</div>
+    <div class="card-body">
+      <div class="cond-grid">
+        <div class="cond-block">
+          <h4>Sinal (15%)</h4>
+          <div class="cond-table">
+            <div class="cond-table-item"><span>Valor Tabela</span><strong id="tblSinal">–</strong></div>
+            <div class="cond-table-item"><span>Parcelas</span><strong id="tblQtdSinal">1x</strong></div>
+            <div class="cond-table-item"><span>% Padrão</span><strong id="tblPctSinal">15%</strong></div>
+          </div>
+          <div class="cond-custom">
+            <div class="field"><label>Valor p/ parcela</label><input type="text" id="custSinal" placeholder="0,00" oninput="recalcFromValue('sinal')"></div>
+            <div class="field"><label>Parcelas</label><input type="number" id="qtdSinal" value="1" min="1" max="12" oninput="recalcFromValue('sinal')"></div>
+            <div class="field"><label>% Calculado</label><input type="text" id="pctSinal" readonly></div>
+          </div>
+        </div>
+        <div class="cond-block">
+          <h4>Mensais – 36 Parcelas (20%)</h4>
+          <div class="cond-table">
+            <div class="cond-table-item"><span>Valor Tabela (por parcela)</span><strong id="tblMensais">–</strong></div>
+            <div class="cond-table-item"><span>Parcelas</span><strong id="tblQtdMensais">36x</strong></div>
+            <div class="cond-table-item"><span>% Padrão</span><strong id="tblPctMensais">20%</strong></div>
+          </div>
+          <div class="cond-custom">
+            <div class="field"><label>Valor p/ parcela</label><input type="text" id="custMensais" placeholder="0,00" oninput="recalcFromValue('mensais')"></div>
+            <div class="field"><label>Parcelas</label><input type="number" id="qtdMensais" value="36" min="1" max="120" oninput="recalcFromValue('mensais')"></div>
+            <div class="field"><label>% Calculado</label><input type="text" id="pctMensais" readonly></div>
+          </div>
+        </div>
+        <div class="cond-block">
+          <h4>Intermediárias – 8º/14º/20º/28º Mês (15%)</h4>
+          <div class="cond-table">
+            <div class="cond-table-item"><span>Valor Tabela (por parcela)</span><strong id="tblInterm">–</strong></div>
+            <div class="cond-table-item"><span>Qtd</span><strong id="tblQtdInterm">4x</strong></div>
+            <div class="cond-table-item"><span>% Padrão</span><strong id="tblPctInterm">15%</strong></div>
+          </div>
+          <div class="cond-custom">
+            <div class="field"><label>Valor p/ parcela</label><input type="text" id="custInterm" placeholder="0,00" oninput="recalcFromValue('interm')"></div>
+            <div class="field"><label>Qtd</label><input type="number" id="qtdInterm" value="4" min="0" max="12" oninput="recalcFromValue('interm')"></div>
+            <div class="field"><label>% Calculado</label><input type="text" id="pctInterm" readonly></div>
+          </div>
+        </div>
+        <div class="cond-block">
+          <h4>Quitação / Repasse (50%)</h4>
+          <div class="cond-table">
+            <div class="cond-table-item"><span>Valor Tabela</span><strong id="tblQuitacao">–</strong></div>
+            <div class="cond-table-item"><span>Parcelas</span><strong id="tblQtdQuitacao">1x</strong></div>
+            <div class="cond-table-item"><span>% Padrão</span><strong id="tblPctQuitacao">50%</strong></div>
+          </div>
+          <div class="cond-custom">
+            <div class="field"><label>Valor p/ parcela</label><input type="text" id="custQuitacao" placeholder="0,00" oninput="recalcFromValue('quitacao')"></div>
+            <div class="field"><label>Parcelas</label><input type="number" id="qtdQuitacao" value="1" min="1" max="12" oninput="recalcFromValue('quitacao')"></div>
+            <div class="field"><label>% Calculado</label><input type="text" id="pctQuitacao" readonly></div>
+          </div>
+        </div>
+      </div>
+      <div id="pctWarning" style="display:none;margin-top:10px;padding:8px 12px;background:#FFF3CD;border-left:4px solid #F59E0B;border-radius:4px;font-size:12px;color:#92400E;font-weight:600;"></div>
+      <div class="live-total-bar" id="liveTotalBar">
+        <div class="live-total-cell highlight"><span>💰 Total da Proposta</span><strong id="liveTotalProposta">R$ 0,00</strong></div>
+        <div class="live-total-cell"><span>🏠 Valor da Unidade</span><strong id="liveTotalUnidade">–</strong></div>
+        <div class="live-total-cell" id="liveDiffCell"><span id="liveDiffLabel">Diferença</span><strong id="liveDiff">–</strong></div>
+      </div>
+      <input type="date" id="dataInicio" style="display:none">
+    </div>
+  </div>
+  <div class="print-total-bar" style="display:none" id="printTotalBar">
+    <span>💰 Valor Total da Proposta</span>
+    <strong id="printTotalValor">–</strong>
+  </div>
+  <div class="card no-print">
+    <div class="card-header">Observações</div>
+    <div class="card-body">
+      <div class="field"><textarea id="observacoes" rows="3" placeholder="Digite aqui alguma observação sobre a proposta..."></textarea></div>
+    </div>
+  </div>
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="simular()">▶ Simular Pagamento</button>
+    <button class="btn-add no-print" onclick="addUnitToProposal()">➕ Adicionar à Proposta</button>
+  </div>
+  <div class="card no-print unit-list-section" id="unitListSection">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+      <span>📋 Unidades na Proposta</span>
+      <button onclick="clearAllUnits()" style="background:rgba(255,255,255,.2);border:none;color:white;border-radius:5px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700;">🗑 Limpar Tudo</button>
+    </div>
+    <div class="card-body"><div id="unitCardList"></div></div>
+  </div>
+  <div class="consolidated-summary no-print" id="consolidatedSummary" style="display:none">
+    <h3>🏢 Resumo Consolidado — Todas as Unidades</h3>
+    <div class="consol-grid" id="consolGrid"></div>
+  </div>
+  <div class="consolidated-print print-only" id="consolidatedPrint" style="display:none">
+    <h3>Resumo Consolidado — Todas as Unidades da Proposta</h3>
+    <table>
+      <thead><tr><th>Unidade</th><th>Área Priv. (m²)</th><th>Área Total (m²)</th><th>Vagas</th><th>Valor Total</th><th>Sinal</th><th>Mensais (total)</th><th>Intermediárias</th><th>Quitação</th></tr></thead>
+      <tbody id="consolPrintBody"></tbody>
+      <tfoot><tr id="consolPrintFoot"></tr></tfoot>
+    </table>
+  </div>
+  <div class="summary-bar" id="summaryBar">
+    <div class="summary-item"><span>Valor da Unidade</span><strong id="sumValor">–</strong></div>
+    <div class="summary-item"><span>Sinal</span><strong id="sumSinal">–</strong></div>
+    <div class="summary-item"><span>Total Mensais</span><strong id="sumMensais">–</strong></div>
+    <div class="summary-item"><span>Total Intermediárias</span><strong id="sumInterm">–</strong></div>
+    <div class="summary-item"><span>Quitação</span><strong id="sumQuitacao">–</strong></div>
+  </div>
+  <div class="result-section" id="resultSection">
+    <div class="card">
+      <div class="card-header">Fluxo de Pagamento</div>
+      <div class="card-body" style="padding:0">
+        <div style="overflow-x:auto">
+          <table id="scheduleTable">
+            <thead><tr><th>#</th><th>Data</th><th>Tipo</th><th style="text-align:right">Valor (R$)</th></tr></thead>
+            <tbody id="scheduleBody"></tbody>
+            <tfoot><tr><td colspan="3"><strong>Total Geral</strong></td><td class="money" id="scheduleTotal">–</td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row no-print">
+      <button class="btn btn-outline" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+      <button class="btn btn-success" onclick="exportExcel()">📥 Exportar Excel</button>
+    </div>
+    <div class="disclaimer">
+      A) As parcelas mensais serão reajustadas pela variação do INCC durante a obra e, a partir da entrega, pelo IPCA. B) As parcelas intermediárias vencem no 8º, 14º, 20º e 28º mês após a assinatura do contrato. C) Condição válida conforme disponibilidade de unidades. Este documento é uma <strong>simulação de condição de pagamento</strong>, não garantindo a venda. D) Valores sujeitos a alteração sem aviso prévio.
+    </div>
+  </div>
+  <div class="disclaimer print-only" style="display:none">
+    A) Parcelas mensais reajustadas pelo INCC durante a obra e IPCA após entrega. B) Intermediárias vencem no 8º, 14º, 20º e 28º mês. C) Simulação de condição de pagamento, não garantindo a venda. D) Valores sujeitos a alteração sem aviso prévio.
+  </div>
+  <div class="signature-section" style="display:none">
+    <div class="signature-block"><div class="signature-line"></div><p class="sig-label">Incorporadora</p><p>CBMC Incorporadora</p></div>
+    <div class="signature-block"><div class="signature-line"></div><p class="sig-label">Proponente / Comprador(a)</p><p id="sigNomeProponente"></p></div>
+  </div>
+</div>
+<script>
+const UNITS = [
+{"unidade":"1401","andar":"14","area":148.78,"areaTotal":299.53,"vagas":2,"valor":1710970,"sinal":256645.5,"mensais":9505.39,"intermediarias":64161.38,"quitacao":855485},
+{"unidade":"1402","andar":"14","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
+{"unidade":"1403","andar":"14","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
+{"unidade":"1404","andar":"14","area":125.19,"areaTotal":264.79,"vagas":2,"valor":1439685,"sinal":215952.75,"mensais":7998.25,"intermediarias":53988.19,"quitacao":719842.5},
+{"unidade":"1405","andar":"14","area":147.95,"areaTotal":298.25,"vagas":2,"valor":1701425,"sinal":255213.75,"mensais":9452.36,"intermediarias":63803.44,"quitacao":850712.5},
+{"unidade":"1406","andar":"14","area":45.79,"areaTotal":107.49,"vagas":1,"valor":739966.4,"sinal":110994.96,"mensais":4110.92,"intermediarias":27748.74,"quitacao":369983.2},
+{"unidade":"1407","andar":"14","area":45.79,"areaTotal":107.49,"vagas":1,"valor":739966.4,"sinal":110994.96,"mensais":4110.92,"intermediarias":27748.74,"quitacao":369983.2},
+{"unidade":"1408","andar":"14","area":46.59,"areaTotal":108.9,"vagas":1,"valor":752894.4,"sinal":112934.16,"mensais":4182.75,"intermediarias":28233.54,"quitacao":376447.2},
+{"unidade":"1409","andar":"14","area":148.78,"areaTotal":299.53,"vagas":2,"valor":1710970,"sinal":256645.5,"mensais":9505.39,"intermediarias":64161.38,"quitacao":855485},
+{"unidade":"1501","andar":"15","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1179765,"sinal":176964.75,"mensais":6554.25,"intermediarias":44241.19,"quitacao":589882.5},
+{"unidade":"1502","andar":"15","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
+{"unidade":"1503","andar":"15","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
+{"unidade":"1504","andar":"15","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1179765,"sinal":176964.75,"mensais":6554.25,"intermediarias":44241.19,"quitacao":589882.5},
+{"unidade":"1505","andar":"15","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1180381.95,"sinal":177057.29,"mensais":6557.68,"intermediarias":44264.32,"quitacao":590190.98},
+{"unidade":"1506","andar":"15","area":45.79,"areaTotal":107.49,"vagas":1,"valor":739966.4,"sinal":110994.96,"mensais":4110.92,"intermediarias":27748.74,"quitacao":369983.2},
+{"unidade":"1507","andar":"15","area":45.79,"areaTotal":107.49,"vagas":1,"valor":739966.4,"sinal":110994.96,"mensais":4110.92,"intermediarias":27748.74,"quitacao":369983.2},
+{"unidade":"1508","andar":"15","area":46.59,"areaTotal":108.9,"vagas":1,"valor":752894.4,"sinal":112934.16,"mensais":4182.75,"intermediarias":28233.54,"quitacao":376447.2},
+{"unidade":"1509","andar":"15","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1191562.65,"sinal":178734.4,"mensais":6619.79,"intermediarias":44683.6,"quitacao":595781.32},
+{"unidade":"1601","andar":"16","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1179765,"sinal":176964.75,"mensais":6554.25,"intermediarias":44241.19,"quitacao":589882.5},
+{"unidade":"1602","andar":"16","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
+{"unidade":"1603","andar":"16","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
+{"unidade":"1604","andar":"16","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1179765,"sinal":176964.75,"mensais":6554.25,"intermediarias":44241.19,"quitacao":589882.5},
+{"unidade":"1605","andar":"16","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1180381.95,"sinal":177057.29,"mensais":6557.68,"intermediarias":44264.32,"quitacao":590190.98},
+{"unidade":"1606","andar":"16","area":45.79,"areaTotal":107.49,"vagas":1,"valor":739966.4,"sinal":110994.96,"mensais":4110.92,"intermediarias":27748.74,"quitacao":369983.2},
+{"unidade":"1607","andar":"16","area":45.79,"areaTotal":107.49,"vagas":1,"valor":739966.4,"sinal":110994.96,"mensais":4110.92,"intermediarias":27748.74,"quitacao":369983.2},
+{"unidade":"1608","andar":"16","area":46.59,"areaTotal":108.9,"vagas":1,"valor":752894.4,"sinal":112934.16,"mensais":4182.75,"intermediarias":28233.54,"quitacao":376447.2},
+{"unidade":"1609","andar":"16","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1191562.65,"sinal":178734.4,"mensais":6619.79,"intermediarias":44683.6,"quitacao":595781.32},
+{"unidade":"1701","andar":"17","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1179765,"sinal":176964.75,"mensais":6554.25,"intermediarias":44241.19,"quitacao":589882.5},
+{"unidade":"1702","andar":"17","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
+{"unidade":"1703","andar":"17","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
+{"unidade":"1704","andar":"17","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1179765,"sinal":176964.75,"mensais":6554.25,"intermediarias":44241.19,"quitacao":589882.5},
+{"unidade":"1705","andar":"17","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1180381.95,"sinal":177057.29,"mensais":6557.68,"intermediarias":44264.32,"quitacao":590190.98},
+{"unidade":"1706","andar":"17","area":45.79,"areaTotal":107.49,"vagas":1,"valor":739966.4,"sinal":110994.96,"mensais":4110.92,"intermediarias":27748.74,"quitacao":369983.2},
+{"unidade":"1707","andar":"17","area":45.79,"areaTotal":107.49,"vagas":1,"valor":739966.4,"sinal":110994.96,"mensais":4110.92,"intermediarias":27748.74,"quitacao":369983.2},
+{"unidade":"1708","andar":"17","area":46.59,"areaTotal":108.9,"vagas":1,"valor":752894.4,"sinal":112934.16,"mensais":4182.75,"intermediarias":28233.54,"quitacao":376447.2},
+{"unidade":"1709","andar":"17","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1191562.65,"sinal":178734.4,"mensais":6619.79,"intermediarias":44683.6,"quitacao":595781.32},
+{"unidade":"1801","andar":"18","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1191562.65,"sinal":178734.4,"mensais":6619.79,"intermediarias":44683.6,"quitacao":595781.32},
+{"unidade":"1802","andar":"18","area":46.59,"areaTotal":108.9,"vagas":1,"valor":752894.4,"sinal":112934.16,"mensais":4182.75,"intermediarias":28233.54,"quitacao":376447.2},
+{"unidade":"1803","andar":"18","area":46.59,"areaTotal":108.9,"vagas":1,"valor":752894.4,"sinal":112934.16,"mensais":4182.75,"intermediarias":28233.54,"quitacao":376447.2},
+{"unidade":"1804","andar":"18","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1191562.65,"sinal":178734.4,"mensais":6619.79,"intermediarias":44683.6,"quitacao":595781.32},
+{"unidade":"1805","andar":"18","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1192185.77,"sinal":178827.87,"mensais":6623.25,"intermediarias":44706.97,"quitacao":596092.88},
+{"unidade":"1806","andar":"18","area":45.79,"areaTotal":107.49,"vagas":1,"valor":747366.06,"sinal":112104.91,"mensais":4152.03,"intermediarias":28026.23,"quitacao":373683.03},
+{"unidade":"1807","andar":"18","area":45.79,"areaTotal":107.49,"vagas":1,"valor":747366.06,"sinal":112104.91,"mensais":4152.03,"intermediarias":28026.23,"quitacao":373683.03},
+{"unidade":"1808","andar":"18","area":46.59,"areaTotal":108.9,"vagas":1,"valor":760423.34,"sinal":114063.5,"mensais":4224.57,"intermediarias":28515.88,"quitacao":380211.67},
+{"unidade":"1809","andar":"18","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1203478.28,"sinal":180521.74,"mensais":6685.99,"intermediarias":45130.44,"quitacao":601739.14},
+{"unidade":"1901","andar":"19","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1203478.28,"sinal":180521.74,"mensais":6685.99,"intermediarias":45130.44,"quitacao":601739.14},
+{"unidade":"1902","andar":"19","area":46.59,"areaTotal":108.9,"vagas":1,"valor":760423.34,"sinal":114063.5,"mensais":4224.57,"intermediarias":28515.88,"quitacao":380211.67},
+{"unidade":"1903","andar":"19","area":46.59,"areaTotal":108.9,"vagas":1,"valor":760423.34,"sinal":114063.5,"mensais":4224.57,"intermediarias":28515.88,"quitacao":380211.67},
+{"unidade":"1904","andar":"19","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1203478.28,"sinal":180521.74,"mensais":6685.99,"intermediarias":45130.44,"quitacao":601739.14},
+{"unidade":"1905","andar":"19","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1204107.63,"sinal":180616.14,"mensais":6689.49,"intermediarias":45154.04,"quitacao":602053.81},
+{"unidade":"1906","andar":"19","area":45.79,"areaTotal":107.49,"vagas":1,"valor":754839.72,"sinal":113225.96,"mensais":4193.55,"intermediarias":28306.49,"quitacao":377419.86},
+{"unidade":"1907","andar":"19","area":45.79,"areaTotal":107.49,"vagas":1,"valor":754839.72,"sinal":113225.96,"mensais":4193.55,"intermediarias":28306.49,"quitacao":377419.86},
+{"unidade":"1908","andar":"19","area":46.59,"areaTotal":108.9,"vagas":1,"valor":768027.58,"sinal":115204.14,"mensais":4266.82,"intermediarias":28801.03,"quitacao":384013.79},
+{"unidade":"1909","andar":"19","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1215513.06,"sinal":182326.96,"mensais":6752.85,"intermediarias":45581.74,"quitacao":607756.53},
+{"unidade":"2001","andar":"20","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1215513.06,"sinal":182326.96,"mensais":6752.85,"intermediarias":45581.74,"quitacao":607756.53},
+{"unidade":"2002","andar":"20","area":46.59,"areaTotal":108.9,"vagas":1,"valor":768027.58,"sinal":115204.14,"mensais":4266.82,"intermediarias":28801.03,"quitacao":384013.79},
+{"unidade":"2003","andar":"20","area":46.59,"areaTotal":108.9,"vagas":1,"valor":768027.58,"sinal":115204.14,"mensais":4266.82,"intermediarias":28801.03,"quitacao":384013.79},
+{"unidade":"2004","andar":"20","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1215513.06,"sinal":182326.96,"mensais":6752.85,"intermediarias":45581.74,"quitacao":607756.53},
+{"unidade":"2005","andar":"20","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1216148.7,"sinal":182422.31,"mensais":6756.38,"intermediarias":45605.58,"quitacao":608074.35},
+{"unidade":"2006","andar":"20","area":45.79,"areaTotal":107.49,"vagas":1,"valor":762388.12,"sinal":114358.22,"mensais":4235.49,"intermediarias":28589.55,"quitacao":381194.06},
+{"unidade":"2007","andar":"20","area":45.79,"areaTotal":107.49,"vagas":1,"valor":762388.12,"sinal":114358.22,"mensais":4235.49,"intermediarias":28589.55,"quitacao":381194.06},
+{"unidade":"2008","andar":"20","area":46.59,"areaTotal":108.9,"vagas":1,"valor":775707.85,"sinal":116356.18,"mensais":4309.49,"intermediarias":29089.04,"quitacao":387853.93},
+{"unidade":"2009","andar":"20","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1227668.19,"sinal":184150.23,"mensais":6820.38,"intermediarias":46037.56,"quitacao":613834.09},
+{"unidade":"2101","andar":"21","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1221590.62,"sinal":183238.59,"mensais":6786.61,"intermediarias":45809.65,"quitacao":610795.31},
+{"unidade":"2102","andar":"21","area":46.59,"areaTotal":108.9,"vagas":1,"valor":771867.72,"sinal":115780.16,"mensais":4288.15,"intermediarias":28945.04,"quitacao":385933.86},
+{"unidade":"2103","andar":"21","area":46.59,"areaTotal":108.9,"vagas":1,"valor":771867.72,"sinal":115780.16,"mensais":4288.15,"intermediarias":28945.04,"quitacao":385933.86},
+{"unidade":"2104","andar":"21","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1447811.11,"sinal":217171.67,"mensais":8043.4,"intermediarias":54292.92,"quitacao":723905.56},
+{"unidade":"2105","andar":"21","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1222229.45,"sinal":183334.42,"mensais":6790.16,"intermediarias":45833.6,"quitacao":611114.72},
+{"unidade":"2106","andar":"21","area":45.79,"areaTotal":107.49,"vagas":1,"valor":766200.06,"sinal":114930.01,"mensais":4256.67,"intermediarias":28732.5,"quitacao":383100.03},
+{"unidade":"2107","andar":"21","area":45.79,"areaTotal":107.49,"vagas":1,"valor":766200.06,"sinal":114930.01,"mensais":4256.67,"intermediarias":28732.5,"quitacao":383100.03},
+{"unidade":"2108","andar":"21","area":46.59,"areaTotal":108.9,"vagas":1,"valor":779586.39,"sinal":116937.96,"mensais":4331.04,"intermediarias":29234.49,"quitacao":389793.2},
+{"unidade":"2109","andar":"21","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1233806.53,"sinal":185070.98,"mensais":6854.48,"intermediarias":46267.74,"quitacao":616903.27},
+{"unidade":"2201","andar":"22","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1227698.58,"sinal":184154.79,"mensais":6820.55,"intermediarias":46038.7,"quitacao":613849.29},
+{"unidade":"2202","andar":"22","area":46.59,"areaTotal":108.9,"vagas":1,"valor":775727.05,"sinal":116359.06,"mensais":4309.59,"intermediarias":29089.76,"quitacao":387863.53},
+{"unidade":"2203","andar":"22","area":46.59,"areaTotal":108.9,"vagas":1,"valor":775727.05,"sinal":116359.06,"mensais":4309.59,"intermediarias":29089.76,"quitacao":387863.53},
+{"unidade":"2204","andar":"22","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1227698.58,"sinal":184154.79,"mensais":6820.55,"intermediarias":46038.7,"quitacao":613849.29},
+{"unidade":"2205","andar":"22","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1228340.59,"sinal":184251.09,"mensais":6824.11,"intermediarias":46062.77,"quitacao":614170.3},
+{"unidade":"2206","andar":"22","area":45.79,"areaTotal":107.49,"vagas":1,"valor":770031.06,"sinal":115504.66,"mensais":4277.95,"intermediarias":28876.16,"quitacao":385015.53},
+{"unidade":"2207","andar":"22","area":45.79,"areaTotal":107.49,"vagas":1,"valor":770031.06,"sinal":115504.66,"mensais":4277.95,"intermediarias":28876.16,"quitacao":385015.53},
+{"unidade":"2208","andar":"22","area":46.59,"areaTotal":108.9,"vagas":1,"valor":783484.32,"sinal":117522.65,"mensais":4352.69,"intermediarias":29380.66,"quitacao":391742.16},
+{"unidade":"2209","andar":"22","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1239975.56,"sinal":185996.33,"mensais":6888.75,"intermediarias":46499.08,"quitacao":619987.78},
+{"unidade":"2301","andar":"23","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1233837.07,"sinal":185075.56,"mensais":6854.65,"intermediarias":46268.89,"quitacao":616918.54},
+{"unidade":"2302","andar":"23","area":46.59,"areaTotal":108.9,"vagas":1,"valor":779605.69,"sinal":116940.85,"mensais":4331.14,"intermediarias":29235.21,"quitacao":389802.84},
+{"unidade":"2303","andar":"23","area":46.59,"areaTotal":108.9,"vagas":1,"valor":779605.69,"sinal":116940.85,"mensais":4331.14,"intermediarias":29235.21,"quitacao":389802.84},
+{"unidade":"2304","andar":"23","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1233837.07,"sinal":185075.56,"mensais":6854.65,"intermediarias":46268.89,"quitacao":616918.54},
+{"unidade":"2305","andar":"23","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1234482.3,"sinal":185172.34,"mensais":6858.23,"intermediarias":46293.09,"quitacao":617241.15},
+{"unidade":"2306","andar":"23","area":45.79,"areaTotal":107.49,"vagas":1,"valor":773881.22,"sinal":116082.18,"mensais":4299.34,"intermediarias":29020.55,"quitacao":386940.61},
+{"unidade":"2307","andar":"23","area":45.79,"areaTotal":107.49,"vagas":1,"valor":773881.22,"sinal":116082.18,"mensais":4299.34,"intermediarias":29020.55,"quitacao":386940.61},
+{"unidade":"2308","andar":"23","area":46.59,"areaTotal":108.9,"vagas":1,"valor":787401.75,"sinal":118110.26,"mensais":4374.45,"intermediarias":29527.57,"quitacao":393700.87},
+{"unidade":"2309","andar":"23","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1246175.44,"sinal":186926.32,"mensais":6923.2,"intermediarias":46731.58,"quitacao":623087.72},
+{"unidade":"2401","andar":"24","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1233837.07,"sinal":185075.56,"mensais":6854.65,"intermediarias":46268.89,"quitacao":616918.54},
+{"unidade":"2402","andar":"24","area":46.59,"areaTotal":108.9,"vagas":1,"valor":779605.69,"sinal":116940.85,"mensais":4331.14,"intermediarias":29235.21,"quitacao":389802.84},
+{"unidade":"2403","andar":"24","area":46.59,"areaTotal":108.9,"vagas":1,"valor":779605.69,"sinal":116940.85,"mensais":4331.14,"intermediarias":29235.21,"quitacao":389802.84},
+{"unidade":"2404","andar":"24","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1233837.07,"sinal":185075.56,"mensais":6854.65,"intermediarias":46268.89,"quitacao":616918.54},
+{"unidade":"2405","andar":"24","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1234482.3,"sinal":185172.34,"mensais":6858.23,"intermediarias":46293.09,"quitacao":617241.15},
+{"unidade":"2406","andar":"24","area":45.79,"areaTotal":107.49,"vagas":1,"valor":773881.22,"sinal":116082.18,"mensais":4299.34,"intermediarias":29020.55,"quitacao":386940.61},
+{"unidade":"2407","andar":"24","area":45.79,"areaTotal":107.49,"vagas":1,"valor":773881.22,"sinal":116082.18,"mensais":4299.34,"intermediarias":29020.55,"quitacao":386940.61},
+{"unidade":"2408","andar":"24","area":46.59,"areaTotal":108.9,"vagas":1,"valor":787401.75,"sinal":118110.26,"mensais":4374.45,"intermediarias":29527.57,"quitacao":393700.87},
+{"unidade":"2409","andar":"24","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1246175.44,"sinal":186926.32,"mensais":6923.2,"intermediarias":46731.58,"quitacao":623087.72},
+{"unidade":"2501","andar":"25","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1246175.44,"sinal":186926.32,"mensais":6923.2,"intermediarias":46731.58,"quitacao":623087.72},
+{"unidade":"2502","andar":"25","area":46.59,"areaTotal":108.9,"vagas":1,"valor":787401.75,"sinal":118110.26,"mensais":4374.45,"intermediarias":29527.57,"quitacao":393700.87},
+{"unidade":"2503","andar":"25","area":46.59,"areaTotal":108.9,"vagas":1,"valor":787401.75,"sinal":118110.26,"mensais":4374.45,"intermediarias":29527.57,"quitacao":393700.87},
+{"unidade":"2504","andar":"25","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1246175.44,"sinal":186926.32,"mensais":6923.2,"intermediarias":46731.58,"quitacao":623087.72},
+{"unidade":"2505","andar":"25","area":86.57,"areaTotal":207.83,"vagas":2,"valor":1246827.12,"sinal":187024.07,"mensais":6926.82,"intermediarias":46756.02,"quitacao":623413.56},
+{"unidade":"2506","andar":"25","area":45.79,"areaTotal":107.49,"vagas":1,"valor":781620.03,"sinal":117243,"mensais":4342.33,"intermediarias":29310.75,"quitacao":390810.02},
+{"unidade":"2507","andar":"25","area":45.79,"areaTotal":107.49,"vagas":1,"valor":781620.03,"sinal":117243,"mensais":4342.33,"intermediarias":29310.75,"quitacao":390810.02},
+{"unidade":"2508","andar":"25","area":46.59,"areaTotal":108.9,"vagas":1,"valor":795275.76,"sinal":119291.36,"mensais":4418.2,"intermediarias":29822.84,"quitacao":397637.88},
+{"unidade":"2509","andar":"25","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1258637.2,"sinal":188795.58,"mensais":6992.43,"intermediarias":47198.9,"quitacao":629318.6}
+];
+const fmt = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtMoney = v => 'R$ '+fmt(v);
+function addMonths(dateStr,months){const[y,m,d]=dateStr.split('-').map(Number);const dt=new Date(y,m-1+months,d);return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
+function fmtDate(dateStr){if(!dateStr)return '';const[y,m,d]=dateStr.split('-');return `${d}/${m}/${y}`;}
+function loadLogo(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{const box=document.getElementById('logoBox');box.innerHTML=`<img src="${ev.target.result}" alt="Logo">`;};reader.readAsDataURL(file);}
+window.addEventListener('DOMContentLoaded',()=>{
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('dataProposta').value=today;
+  document.getElementById('dataInicio').value=today;
+  const floors=[...new Set(UNITS.map(u=>u.andar))].sort((a,b)=>+a-+b);
+  const sel=document.getElementById('selAndar');
+  floors.forEach(f=>{const opt=document.createElement('option');opt.value=f;opt.text=`${f}º Andar`;sel.appendChild(opt);});
+});
+function updateUnidades(){
+  const andar=document.getElementById('selAndar').value;
+  const selU=document.getElementById('selUnidade');
+  selU.innerHTML='<option value="">— Selecione a unidade —</option>';
+  selU.disabled=!andar;
+  document.getElementById('unitInfo').classList.remove('visible');
+  if(!andar)return;
+  const units=UNITS.filter(u=>u.andar===andar);
+  units.forEach(u=>{const opt=document.createElement('option');opt.value=u.unidade;opt.text=`Unidade ${u.unidade} – ${u.area}m² priv.`;selU.appendChild(opt);});
+  selU.disabled=false;
+}
+function onUnidadeSelected(){
+  const unid=document.getElementById('selUnidade').value;
+  if(!unid){document.getElementById('unitInfo').classList.remove('visible');return;}
+  const u=UNITS.find(x=>x.unidade===unid);
+  document.getElementById('infoArea').textContent=u.area+' m²';
+  document.getElementById('infoAreaTotal').textContent=u.areaTotal+' m²';
+  document.getElementById('infoVagas').textContent=u.vagas+' vaga(s)';
+  document.getElementById('infoValor').textContent=fmtMoney(u.valor);
+  document.getElementById('unitInfo').classList.add('visible');
+  recalcConditions();
+}
+function recalcConditions(){
+  const unid=document.getElementById('selUnidade').value;
+  if(!unid)return;
+  const u=UNITS.find(x=>x.unidade===unid);
+  const v=u.valor;
+  document.getElementById('tblSinal').textContent=fmtMoney(u.sinal);
+  document.getElementById('tblPctSinal').textContent=((u.sinal/v)*100).toFixed(1)+'%';
+  document.getElementById('tblMensais').textContent=fmtMoney(u.mensais);
+  document.getElementById('tblQtdMensais').textContent='36x';
+  document.getElementById('tblPctMensais').textContent=((u.mensais*36/v)*100).toFixed(1)+'%';
+  document.getElementById('tblInterm').textContent=fmtMoney(u.intermediarias);
+  document.getElementById('tblQtdInterm').textContent='4x';
+  document.getElementById('tblPctInterm').textContent=((u.intermediarias*4/v)*100).toFixed(1)+'%';
+  document.getElementById('tblQuitacao').textContent=fmtMoney(u.quitacao);
+  document.getElementById('tblPctQuitacao').textContent=((u.quitacao/v)*100).toFixed(1)+'%';
+  document.getElementById('custSinal').value=fmt(u.sinal);
+  document.getElementById('qtdSinal').value=1;
+  document.getElementById('custMensais').value=fmt(u.mensais);
+  document.getElementById('qtdMensais').value=36;
+  document.getElementById('custInterm').value=fmt(u.intermediarias);
+  document.getElementById('qtdInterm').value=4;
+  document.getElementById('custQuitacao').value=fmt(u.quitacao);
+  document.getElementById('qtdQuitacao').value=1;
+  ['sinal','mensais','interm','quitacao'].forEach(recalcFromValue);
+}
+function parseVal(str){if(!str)return 0;return parseFloat(String(str).replace(/R\$\s*/g,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.'))||0;}
+function recalcFromValue(tipo){
+  const unid=document.getElementById('selUnidade').value;
+  if(!unid)return;
+  const valor=UNITS.find(x=>x.unidade===unid).valor;
+  const map={sinal:['custSinal','qtdSinal','pctSinal'],mensais:['custMensais','qtdMensais','pctMensais'],interm:['custInterm','qtdInterm','pctInterm'],quitacao:['custQuitacao','qtdQuitacao','pctQuitacao']};
+  const[cId,qId,pId]=map[tipo];
+  const vp=parseVal(document.getElementById(cId).value);
+  const qtd=+document.getElementById(qId).value||1;
+  document.getElementById(pId).value=valor>0?((vp*qtd/valor)*100).toFixed(2)+'%':'0.00%';
+  const tS=parseVal(document.getElementById('custSinal').value)*(+document.getElementById('qtdSinal').value||1);
+  const tM=parseVal(document.getElementById('custMensais').value)*(+document.getElementById('qtdMensais').value||1);
+  const tI=parseVal(document.getElementById('custInterm').value)*(+document.getElementById('qtdInterm').value||0);
+  const tQ=parseVal(document.getElementById('custQuitacao').value)*(+document.getElementById('qtdQuitacao').value||1);
+  const totalPct=(tS+tM+tI+tQ)/valor*100;
+  const warn=document.getElementById('pctWarning');
+  if(Math.abs(totalPct-100)>0.5){warn.style.display='block';warn.textContent=`⚠️ Atenção: a soma dos valores é ${totalPct.toFixed(1)}% do valor da unidade (deveria ser 100%).`;}else{warn.style.display='none';}
+  const totalProposta=tS+tM+tI+tQ;
+  const diff=totalProposta-valor;
+  const bar=document.getElementById('liveTotalBar');
+  bar.classList.add('visible');
+  document.getElementById('liveTotalProposta').textContent=fmtMoney(totalProposta);
+  document.getElementById('liveTotalUnidade').textContent=fmtMoney(valor);
+  const diffEl=document.getElementById('liveDiff');
+  const diffCell=document.getElementById('liveDiffCell');
+  const diffLbl=document.getElementById('liveDiffLabel');
+  diffEl.textContent=(diff>=0?'+':'')+fmtMoney(diff);
+  diffCell.className='live-total-cell';
+  if(Math.abs(diff)<1){diffLbl.textContent='✅ Equilibrado';diffCell.classList.add('ok');}
+  else if(diff>0){diffLbl.textContent='⬆️ Acima do valor';diffCell.classList.add('warn');}
+  else{diffLbl.textContent='⬇️ Abaixo do valor';diffCell.classList.add('error');}
+  document.getElementById('printTotalValor').textContent=fmtMoney(totalProposta);
+  const nomeEl=document.getElementById('sigNomeProponente');
+  if(nomeEl)nomeEl.textContent=document.getElementById('nomeProponente').value||'___________________________';
+}
+function simular(){
+  const unid=document.getElementById('selUnidade').value;
+  if(!unid){alert('Selecione uma unidade primeiro.');return;}
+  const u=UNITS.find(x=>x.unidade===unid);
+  const valor=u.valor;
+  const dataInicio=document.getElementById('dataInicio').value;
+  if(!dataInicio){alert('Informe a data do 1º pagamento.');return;}
+  const qS=+document.getElementById('qtdSinal').value||1;
+  const qM=+document.getElementById('qtdMensais').value||1;
+  const qI=+document.getElementById('qtdInterm').value||0;
+  const qQ=+document.getElementById('qtdQuitacao').value||1;
+  const valS=parseVal(document.getElementById('custSinal').value);
+  const valM=parseVal(document.getElementById('custMensais').value);
+  const valI=qI>0?parseVal(document.getElementById('custInterm').value):0;
+  const valQ=parseVal(document.getElementById('custQuitacao').value);
+  const rows=[];
+  for(let i=0;i<qS;i++)rows.push({date:addMonths(dataInicio,i),tipo:'sinal',label:`Sinal${qS>1?' '+(i+1)+'/'+qS:''}`,valor:valS});
+  const mensaisStart=addMonths(dataInicio,qS);
+  for(let i=0;i<qM;i++)rows.push({date:addMonths(mensaisStart,i),tipo:'mensal',label:`Mensal ${i+1}/${qM}`,valor:valM});
+  // Intermediárias fixas: 8º, 14º, 20º, 28º mês após início
+  if(qI>0){
+    const intermMonths=[8,14,20,28];
+    for(let i=0;i<Math.min(qI,intermMonths.length);i++)
+      rows.push({date:addMonths(dataInicio,intermMonths[i]-1),tipo:'interm',label:`Intermediária ${i+1}/${qI} (${intermMonths[i]}º mês)`,valor:valI});
+  }
+  const quitacaoStart=addMonths(mensaisStart,qM);
+  for(let i=0;i<qQ;i++)rows.push({date:addMonths(quitacaoStart,i),tipo:'quitacao',label:`Quitação/Repasse${qQ>1?' '+(i+1)+'/'+qQ:''}`,valor:valQ});
+  rows.sort((a,b)=>a.date.localeCompare(b.date));
+  const tbody=document.getElementById('scheduleBody');
+  tbody.innerHTML='';
+  let total=0;
+  rows.forEach((r,idx)=>{
+    total+=r.valor;
+    const badge={sinal:'<span class="badge badge-sinal">Sinal</span>',mensal:'<span class="badge badge-mensal">Mensal</span>',interm:'<span class="badge badge-interm">Intermediária</span>',quitacao:'<span class="badge badge-quitacao">Quitação</span>'}[r.tipo];
+    tbody.innerHTML+=`<tr><td>${idx+1}</td><td>${fmtDate(r.date)}</td><td>${badge} <span style="font-size:12px;color:#666">${r.label}</span></td><td class="money">${fmt(r.valor)}</td></tr>`;
+  });
+  document.getElementById('scheduleTotal').textContent='R$ '+fmt(total);
+  const tS2=valS*qS,tM2=valM*qM,tI2=valI*qI,tQ2=valQ*qQ;
+  document.getElementById('sumValor').textContent=fmtMoney(valor);
+  document.getElementById('sumSinal').textContent=fmtMoney(tS2);
+  document.getElementById('sumMensais').textContent=fmtMoney(tM2);
+  document.getElementById('sumInterm').textContent=fmtMoney(tI2);
+  document.getElementById('sumQuitacao').textContent=fmtMoney(tQ2);
+  document.getElementById('summaryBar').classList.add('visible');
+  document.getElementById('resultSection').classList.add('visible');
+  document.getElementById('summaryBar').scrollIntoView({behavior:'smooth',block:'start'});
+  window._simRows=rows;window._simUnit=u;window._simTotal=total;
+}
+let _proposalUnits=[];
+function addUnitToProposal(){
+  const unid=document.getElementById('selUnidade').value;
+  if(!unid){alert('Selecione e configure uma unidade primeiro.');return;}
+  const u=UNITS.find(x=>x.unidade===unid);
+  const valS=parseVal(document.getElementById('custSinal').value);const qtdS=+document.getElementById('qtdSinal').value||1;
+  const valM=parseVal(document.getElementById('custMensais').value);const qtdM=+document.getElementById('qtdMensais').value||36;
+  const valI=parseVal(document.getElementById('custInterm').value);const qtdI=+document.getElementById('qtdInterm').value||0;
+  const valQ=parseVal(document.getElementById('custQuitacao').value);const qtdQ=+document.getElementById('qtdQuitacao').value||1;
+  const totalProposta=(valS*qtdS)+(valM*qtdM)+(valI*qtdI)+(valQ*qtdQ);
+  _proposalUnits.push({unidade:u.unidade,area:u.area,areaTotal:u.areaTotal,vagas:u.vagas,valorTabela:u.valor,valS,qtdS,valM,qtdM,valI,qtdI,valQ,qtdQ,totalProposta});
+  renderUnitList();updateConsolidated();
+  document.getElementById('unitListSection').classList.add('visible');
+}
+function removeUnit(idx){_proposalUnits.splice(idx,1);renderUnitList();updateConsolidated();if(_proposalUnits.length===0){document.getElementById('unitListSection').classList.remove('visible');document.getElementById('consolidatedSummary').style.display='none';document.getElementById('consolidatedPrint').style.display='none';}}
+function clearAllUnits(){if(!confirm('Remover todas as unidades da proposta?'))return;_proposalUnits=[];renderUnitList();document.getElementById('unitListSection').classList.remove('visible');document.getElementById('consolidatedSummary').style.display='none';document.getElementById('consolidatedPrint').style.display='none';}
+function renderUnitList(){
+  const container=document.getElementById('unitCardList');container.innerHTML='';
+  _proposalUnits.forEach((pu,i)=>{
+    const div=document.createElement('div');div.className='unit-card';
+    div.innerHTML=`<div class="unit-card-info"><div class="unit-card-title">Unidade ${pu.unidade} &nbsp;|&nbsp; ${pu.area} m² priv. / ${pu.areaTotal} m² total | ${pu.vagas} vaga(s)</div><div class="unit-card-detail">Valor Tabela: ${fmtMoney(pu.valorTabela)} &nbsp;·&nbsp; Sinal: ${fmtMoney(pu.valS*pu.qtdS)} &nbsp;·&nbsp; Mensais: ${fmtMoney(pu.valM*pu.qtdM)} (${pu.qtdM}x) &nbsp;·&nbsp; Intermediárias: ${fmtMoney(pu.valI*pu.qtdI)} (${pu.qtdI}x) &nbsp;·&nbsp; Quitação: ${fmtMoney(pu.valQ*pu.qtdQ)} &nbsp;·&nbsp; <strong>Total: ${fmtMoney(pu.totalProposta)}</strong></div></div><button class="unit-card-remove" onclick="removeUnit(${i})">✕ Remover</button>`;
+    container.appendChild(div);
+  });
+}
+function updateConsolidated(){
+  if(_proposalUnits.length===0)return;
+  const totValor=_proposalUnits.reduce((s,p)=>s+p.valorTabela,0);
+  const totSinal=_proposalUnits.reduce((s,p)=>s+(p.valS*p.qtdS),0);
+  const totMensais=_proposalUnits.reduce((s,p)=>s+(p.valM*p.qtdM),0);
+  const totInterm=_proposalUnits.reduce((s,p)=>s+(p.valI*p.qtdI),0);
+  const totQuitacao=_proposalUnits.reduce((s,p)=>s+(p.valQ*p.qtdQ),0);
+  const totGeral=_proposalUnits.reduce((s,p)=>s+p.totalProposta,0);
+  const grid=document.getElementById('consolGrid');
+  grid.innerHTML=[['Unidades',_proposalUnits.length],['Valor Tabela Total',fmtMoney(totValor)],['Total Sinal',fmtMoney(totSinal)],['Total Mensais',fmtMoney(totMensais)],['Total Intermediárias',fmtMoney(totInterm)],['Total Quitação',fmtMoney(totQuitacao)],['💰 Total Geral',fmtMoney(totGeral)]].map(([l,v])=>`<div class="consol-cell"><span>${l}</span><strong>${v}</strong></div>`).join('');
+  document.getElementById('consolidatedSummary').style.display='block';
+  const tbody=document.getElementById('consolPrintBody');
+  tbody.innerHTML=_proposalUnits.map(pu=>`<tr><td>${pu.unidade}</td><td>${pu.area}</td><td>${pu.areaTotal}</td><td>${pu.vagas}</td><td>${fmtMoney(pu.valorTabela)}</td><td>${fmtMoney(pu.valS*pu.qtdS)}</td><td>${fmtMoney(pu.valM*pu.qtdM)} (${pu.qtdM}x)</td><td>${fmtMoney(pu.valI*pu.qtdI)} (${pu.qtdI}x)</td><td>${fmtMoney(pu.valQ*pu.qtdQ)}</td></tr>`).join('');
+  document.getElementById('consolPrintFoot').innerHTML=`<td><strong>TOTAL (${_proposalUnits.length} unidades)</strong></td><td></td><td></td><td></td><td>${fmtMoney(totValor)}</td><td>${fmtMoney(totSinal)}</td><td>${fmtMoney(totMensais)}</td><td>${fmtMoney(totInterm)}</td><td>${fmtMoney(totQuitacao)}</td>`;
+  document.getElementById('consolidatedPrint').style.display='block';
+}
+function exportExcel(){
+  if(!window._simRows){alert('Gere a simulação primeiro.');return;}
+  const u=window._simUnit;
+  const wb=XLSX.utils.book_new();
+  const resumo=[
+    ['SIMULAÇÃO DE COMPRA – TIMELESS RESIDENCE'],[],
+    ['Proponente:',document.getElementById('nomeProponente').value],
+    ['CPF/CNPJ:',document.getElementById('cpf').value],
+    ['Telefone:',document.getElementById('telefone').value],
+    ['E-mail:',document.getElementById('email').value],
+    ['Data da Proposta:',fmtDate(document.getElementById('dataProposta').value)],[],
+    ['Corretor/Imobiliária:',document.getElementById('imobiliaria').value],
+    ['Gestor:',document.getElementById('gestorHVM').value],[],
+    ['UNIDADE SELECIONADA'],
+    ['Unidade:',u.unidade],['Andar:',u.andar+'º'],
+    ['Área Privativa:',u.area+' m²'],['Área Total:',u.areaTotal+' m²'],
+    ['Vagas:',u.vagas],['Valor Total:',u.valor],[],
+    ['RESUMO DO PAGAMENTO'],
+    ['Tipo','% do Valor','Qtd Parcelas','Valor p/ Parcela','Total'],
+    ['Sinal',document.getElementById('pctSinal').value,document.getElementById('qtdSinal').value,parseVal(document.getElementById('custSinal').value),parseVal(document.getElementById('custSinal').value)*(+document.getElementById('qtdSinal').value||1)],
+    ['Mensais (36x)',document.getElementById('pctMensais').value,document.getElementById('qtdMensais').value,parseVal(document.getElementById('custMensais').value),parseVal(document.getElementById('custMensais').value)*(+document.getElementById('qtdMensais').value||1)],
+    ['Intermediárias',document.getElementById('pctInterm').value,document.getElementById('qtdInterm').value,parseVal(document.getElementById('custInterm').value),parseVal(document.getElementById('custInterm').value)*(+document.getElementById('qtdInterm').value||0)],
+    ['Quitação/Repasse',document.getElementById('pctQuitacao').value,document.getElementById('qtdQuitacao').value,parseVal(document.getElementById('custQuitacao').value),parseVal(document.getElementById('custQuitacao').value)*(+document.getElementById('qtdQuitacao').value||1)],
+    [],[' TOTAL GERAL','','','',window._simTotal]
+  ];
+  const ws1=XLSX.utils.aoa_to_sheet(resumo);ws1['!cols']=[{wch:24},{wch:16},{wch:16},{wch:20},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws1,'Resumo');
+  const fluxo=[['#','Data','Tipo','Descrição','Valor (R$)']];
+  window._simRows.forEach((r,i)=>{fluxo.push([i+1,fmtDate(r.date),{sinal:'Sinal',mensal:'Mensal',interm:'Intermediária',quitacao:'Quitação/Repasse'}[r.tipo],r.label,r.valor]);});
+  fluxo.push([]);fluxo.push(['','','','TOTAL',window._simTotal]);
+  const ws2=XLSX.utils.aoa_to_sheet(fluxo);ws2['!cols']=[{wch:5},{wch:14},{wch:18},{wch:26},{wch:18}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Fluxo de Pagamento');
+  const nome=(document.getElementById('nomeProponente').value||'simulacao').replace(/\s+/g,'_');
+  XLSX.writeFile(wb,`Simulacao_TIMELESS_${u.unidade}_${nome}.xlsx`);
+}
+</script>
+</body>
+</html>
