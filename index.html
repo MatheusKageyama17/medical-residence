@@ -115,7 +115,7 @@ header{background:#2C3E7A !important;-webkit-print-color-adjust:exact;print-colo
 .card{box-shadow:none;border:1px solid #CBD8EA;page-break-inside:avoid;margin-bottom:10px;}
 .card-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px 16px;font-size:13px;}
 .card-body{padding:12px 16px;}
-.no-print,.btn-row,#liveTotalBar,#pctWarning,#summaryBar,#resultSection,#cardCorretor{display:none !important;}
+.no-print,.btn-row,#liveTotalBar,#pctWarning,#summaryBar,#resultSection,#cardCorretor,.simulator-selector{display:none !important;}
 .print-only{display:block !important;}
 .print-only-flex{display:flex !important;}
 .cond-block h4{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
@@ -136,6 +136,36 @@ td,th{padding:5px 8px !important;}
 .consolidated-print h3{background:#2C3E7A;color:white;padding:8px 14px;font-size:13px;border-radius:6px 6px 0 0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 .unit-list-section{display:none !important;}
 }
+
+    /* Tab / Simulator Selector Styles */
+    .simulator-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      margin-top: -10px;
+    }
+    .sim-tab {
+      padding: 10px 20px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .sim-tab:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .sim-tab.active {
+      background: white;
+      color: var(--primary);
+      border-color: white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
 </style>
 </head>
 <body>
@@ -145,9 +175,17 @@ td,th{padding:5px 8px !important;}
   </div>
   <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="loadLogo(event)">
   <div>
-    <h1>Simulador de Compra – TIMELESS RESIDENCE</h1>
-    <p>Endereço: Rua Tanzania, Jardim Aclimatação · CBMC Incorporadora</p>
+    <h1 id="mainTitle">Simulador de Compra – TIMELESS RESIDENCE</h1>
+    <p id="mainAddress">Endereço: Rua Tanzania, Jardim Aclimatação · CBMC Incorporadora</p>
     <span class="badge-vigencia">Tabela de Vendas · Vigência: 31/05/2026</span>
+  </div>
+
+  <div class="simulator-selector" style="margin-top: 15px; text-align: center;">
+    <label for="simSelector" style="color: #fff; font-weight: bold; margin-right: 10px;">Selecione o Empreendimento:</label>
+    <select id="simSelector" onchange="switchSimulator(this.value)" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; min-width: 200px;">
+      <option value="TResidence">TIMELESS RESIDENCE</option>
+      <option value="CBMC">MEDICAL CBMC</option>
+    </select>
   </div>
 </header>
 <div class="container">
@@ -336,7 +374,7 @@ td,th{padding:5px 8px !important;}
   </div>
 </div>
 <script>
-const UNITS = [
+const UNITS_TRESIDENCE = [
 {"unidade":"1401","andar":"14","area":148.78,"areaTotal":299.53,"vagas":2,"valor":1710970,"sinal":256645.5,"mensais":9505.39,"intermediarias":64161.38,"quitacao":855485},
 {"unidade":"1402","andar":"14","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
 {"unidade":"1403","andar":"14","area":46.59,"areaTotal":108.9,"vagas":1,"valor":745440,"sinal":111816,"mensais":4141.33,"intermediarias":27954,"quitacao":372720},
@@ -446,6 +484,190 @@ const UNITS = [
 {"unidade":"2508","andar":"25","area":46.59,"areaTotal":108.9,"vagas":1,"valor":795275.76,"sinal":119291.36,"mensais":4418.2,"intermediarias":29822.84,"quitacao":397637.88},
 {"unidade":"2509","andar":"25","area":87.39,"areaTotal":209.26,"vagas":2,"valor":1258637.2,"sinal":188795.58,"mensais":6992.43,"intermediarias":47198.9,"quitacao":629318.6}
 ];
+const UNITS_CBMC = [{"unidade": "101", "andar": "1", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1084845.0, "sinal": 162726.75, "mensais": 6026.92, "intermediarias": 40681.69, "quitacao": 542422.5},
+{"unidade": "102", "andar": "1", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 996650.0, "sinal": 149497.5, "mensais": 5536.94, "intermediarias": 37374.38, "quitacao": 498325.0},
+{"unidade": "103", "andar": "1", "area": 67.75, "areaTotal": 149.47, "vagas": 1, "valor": 1050125.0, "sinal": 157518.75, "mensais": 5834.03, "intermediarias": 39379.69, "quitacao": 525062.5},
+{"unidade": "104", "andar": "1", "area": 65.43, "areaTotal": 145.31, "vagas": 1, "valor": 1014165.0, "sinal": 152124.75, "mensais": 5634.25, "intermediarias": 38031.19, "quitacao": 507082.5},
+{"unidade": "105", "andar": "1", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 996650.0, "sinal": 149497.5, "mensais": 5536.94, "intermediarias": 37374.38, "quitacao": 498325.0},
+{"unidade": "106", "andar": "1", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1084845.0, "sinal": 162726.75, "mensais": 6026.92, "intermediarias": 40681.69, "quitacao": 542422.5},
+{"unidade": "107", "andar": "1", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1095693.45, "sinal": 164354.02, "mensais": 6087.19, "intermediarias": 41088.5, "quitacao": 547846.72},
+{"unidade": "108", "andar": "1", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1006616.5, "sinal": 150992.48, "mensais": 5592.31, "intermediarias": 37748.12, "quitacao": 503308.25},
+{"unidade": "109", "andar": "1", "area": 64.22, "areaTotal": 143.19, "vagas": 1, "valor": 1005364.1, "sinal": 150804.61, "mensais": 5585.36, "intermediarias": 37701.15, "quitacao": 502682.05},
+{"unidade": "110", "andar": "1", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1055773.2, "sinal": 158365.98, "mensais": 5865.41, "intermediarias": 39591.49, "quitacao": 527886.6},
+{"unidade": "111", "andar": "1", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1055773.2, "sinal": 158365.98, "mensais": 5865.41, "intermediarias": 39591.49, "quitacao": 527886.6},
+{"unidade": "112", "andar": "1", "area": 68.62, "areaTotal": 151.1, "vagas": 1, "valor": 1074246.1, "sinal": 161136.92, "mensais": 5968.03, "intermediarias": 40284.23, "quitacao": 537123.05},
+{"unidade": "113", "andar": "1", "area": 65.39, "areaTotal": 145.27, "vagas": 1, "valor": 1023680.45, "sinal": 153552.07, "mensais": 5687.11, "intermediarias": 38388.02, "quitacao": 511840.22},
+{"unidade": "114", "andar": "1", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1006616.5, "sinal": 150992.48, "mensais": 5592.31, "intermediarias": 37748.12, "quitacao": 503308.25},
+{"unidade": "115", "andar": "1", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1095693.45, "sinal": 164354.02, "mensais": 6087.19, "intermediarias": 41088.5, "quitacao": 547846.72},
+{"unidade": "201", "andar": "2", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1084845.0, "sinal": 162726.75, "mensais": 6026.92, "intermediarias": 40681.69, "quitacao": 542422.5},
+{"unidade": "202", "andar": "2", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 996650.0, "sinal": 149497.5, "mensais": 5536.94, "intermediarias": 37374.38, "quitacao": 498325.0},
+{"unidade": "203", "andar": "2", "area": 67.75, "areaTotal": 149.47, "vagas": 1, "valor": 1050125.0, "sinal": 157518.75, "mensais": 5834.03, "intermediarias": 39379.69, "quitacao": 525062.5},
+{"unidade": "204", "andar": "2", "area": 65.43, "areaTotal": 145.31, "vagas": 1, "valor": 1014165.0, "sinal": 152124.75, "mensais": 5634.25, "intermediarias": 38031.19, "quitacao": 507082.5},
+{"unidade": "205", "andar": "2", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 996650.0, "sinal": 149497.5, "mensais": 5536.94, "intermediarias": 37374.38, "quitacao": 498325.0},
+{"unidade": "206", "andar": "2", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1084845.0, "sinal": 162726.75, "mensais": 6026.92, "intermediarias": 40681.69, "quitacao": 542422.5},
+{"unidade": "207", "andar": "2", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1084845.0, "sinal": 162726.75, "mensais": 6026.92, "intermediarias": 40681.69, "quitacao": 542422.5},
+{"unidade": "208", "andar": "2", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1006616.5, "sinal": 150992.48, "mensais": 5592.31, "intermediarias": 37748.12, "quitacao": 503308.25},
+{"unidade": "209", "andar": "2", "area": 64.22, "areaTotal": 143.19, "vagas": 1, "valor": 1005364.1, "sinal": 150804.61, "mensais": 5585.36, "intermediarias": 37701.15, "quitacao": 502682.05},
+{"unidade": "210", "andar": "2", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1055773.2, "sinal": 158365.98, "mensais": 5865.41, "intermediarias": 39591.49, "quitacao": 527886.6},
+{"unidade": "211", "andar": "2", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1055773.2, "sinal": 158365.98, "mensais": 5865.41, "intermediarias": 39591.49, "quitacao": 527886.6},
+{"unidade": "212", "andar": "2", "area": 68.62, "areaTotal": 151.1, "vagas": 1, "valor": 1074246.1, "sinal": 161136.92, "mensais": 5968.03, "intermediarias": 40284.23, "quitacao": 537123.05},
+{"unidade": "213", "andar": "2", "area": 65.39, "areaTotal": 145.27, "vagas": 1, "valor": 1023680.45, "sinal": 153552.07, "mensais": 5687.11, "intermediarias": 38388.02, "quitacao": 511840.22},
+{"unidade": "214", "andar": "2", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1006616.5, "sinal": 150992.48, "mensais": 5592.31, "intermediarias": 37748.12, "quitacao": 503308.25},
+{"unidade": "215", "andar": "2", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1095693.45, "sinal": 164354.02, "mensais": 6087.19, "intermediarias": 41088.5, "quitacao": 547846.72},
+{"unidade": "301", "andar": "3", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1084845.0, "sinal": 162726.75, "mensais": 6026.92, "intermediarias": 40681.69, "quitacao": 542422.5},
+{"unidade": "302", "andar": "3", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 996650.0, "sinal": 149497.5, "mensais": 5536.94, "intermediarias": 37374.38, "quitacao": 498325.0},
+{"unidade": "303", "andar": "3", "area": 67.75, "areaTotal": 149.47, "vagas": 1, "valor": 1050125.0, "sinal": 157518.75, "mensais": 5834.03, "intermediarias": 39379.69, "quitacao": 525062.5},
+{"unidade": "304", "andar": "3", "area": 65.43, "areaTotal": 145.31, "vagas": 1, "valor": 1014165.0, "sinal": 152124.75, "mensais": 5634.25, "intermediarias": 38031.19, "quitacao": 507082.5},
+{"unidade": "305", "andar": "3", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 996650.0, "sinal": 149497.5, "mensais": 5536.94, "intermediarias": 37374.38, "quitacao": 498325.0},
+{"unidade": "306", "andar": "3", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1084845.0, "sinal": 162726.75, "mensais": 6026.92, "intermediarias": 40681.69, "quitacao": 542422.5},
+{"unidade": "307", "andar": "3", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1095693.45, "sinal": 164354.02, "mensais": 6087.19, "intermediarias": 41088.5, "quitacao": 547846.72},
+{"unidade": "308", "andar": "3", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1006616.5, "sinal": 150992.48, "mensais": 5592.31, "intermediarias": 37748.12, "quitacao": 503308.25},
+{"unidade": "309", "andar": "3", "area": 64.22, "areaTotal": 143.19, "vagas": 1, "valor": 1005364.1, "sinal": 150804.61, "mensais": 5585.36, "intermediarias": 37701.15, "quitacao": 502682.05},
+{"unidade": "310", "andar": "3", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1055773.2, "sinal": 158365.98, "mensais": 5865.41, "intermediarias": 39591.49, "quitacao": 527886.6},
+{"unidade": "311", "andar": "3", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1055773.2, "sinal": 158365.98, "mensais": 5865.41, "intermediarias": 39591.49, "quitacao": 527886.6},
+{"unidade": "312", "andar": "3", "area": 68.62, "areaTotal": 151.1, "vagas": 1, "valor": 1074246.1, "sinal": 161136.92, "mensais": 5968.03, "intermediarias": 40284.23, "quitacao": 537123.05},
+{"unidade": "313", "andar": "3", "area": 65.39, "areaTotal": 145.27, "vagas": 1, "valor": 1023680.45, "sinal": 153552.07, "mensais": 5687.11, "intermediarias": 38388.02, "quitacao": 511840.22},
+{"unidade": "314", "andar": "3", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1006616.5, "sinal": 150992.48, "mensais": 5592.31, "intermediarias": 37748.12, "quitacao": 503308.25},
+{"unidade": "315", "andar": "3", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1095693.45, "sinal": 164354.02, "mensais": 6087.19, "intermediarias": 41088.5, "quitacao": 547846.72},
+{"unidade": "401", "andar": "4", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1090269.22, "sinal": 163540.38, "mensais": 6057.05, "intermediarias": 40885.1, "quitacao": 545134.61},
+{"unidade": "402", "andar": "4", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1001633.25, "sinal": 150244.99, "mensais": 5564.63, "intermediarias": 37561.25, "quitacao": 500816.62},
+{"unidade": "403", "andar": "4", "area": 67.75, "areaTotal": 149.47, "vagas": 1, "valor": 1055375.62, "sinal": 158306.34, "mensais": 5863.2, "intermediarias": 39576.59, "quitacao": 527687.81},
+{"unidade": "404", "andar": "4", "area": 65.43, "areaTotal": 145.31, "vagas": 1, "valor": 1019235.82, "sinal": 152885.37, "mensais": 5662.42, "intermediarias": 38221.34, "quitacao": 509617.91},
+{"unidade": "405", "andar": "4", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1001633.25, "sinal": 150244.99, "mensais": 5564.63, "intermediarias": 37561.25, "quitacao": 500816.62},
+{"unidade": "406", "andar": "4", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1090269.22, "sinal": 163540.38, "mensais": 6057.05, "intermediarias": 40885.1, "quitacao": 545134.61},
+{"unidade": "407", "andar": "4", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1101171.92, "sinal": 165175.79, "mensais": 6117.62, "intermediarias": 41293.95, "quitacao": 550585.96},
+{"unidade": "408", "andar": "4", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1011649.58, "sinal": 151747.44, "mensais": 5620.28, "intermediarias": 37936.86, "quitacao": 505824.79},
+{"unidade": "409", "andar": "4", "area": 64.22, "areaTotal": 143.19, "vagas": 1, "valor": 1010390.92, "sinal": 151558.64, "mensais": 5613.28, "intermediarias": 37889.66, "quitacao": 505195.46},
+{"unidade": "410", "andar": "4", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1061052.07, "sinal": 159157.81, "mensais": 5894.73, "intermediarias": 39789.45, "quitacao": 530526.03},
+{"unidade": "411", "andar": "4", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1061052.07, "sinal": 159157.81, "mensais": 5894.73, "intermediarias": 39789.45, "quitacao": 530526.03},
+{"unidade": "412", "andar": "4", "area": 68.62, "areaTotal": 151.1, "vagas": 1, "valor": 1079617.33, "sinal": 161942.6, "mensais": 5997.87, "intermediarias": 40485.65, "quitacao": 539808.67},
+{"unidade": "413", "andar": "4", "area": 65.39, "areaTotal": 145.27, "vagas": 1, "valor": 1028798.85, "sinal": 154319.83, "mensais": 5715.55, "intermediarias": 38579.96, "quitacao": 514399.43},
+{"unidade": "414", "andar": "4", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1011649.58, "sinal": 151747.44, "mensais": 5620.28, "intermediarias": 37936.86, "quitacao": 505824.79},
+{"unidade": "415", "andar": "4", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1101171.92, "sinal": 165175.79, "mensais": 6117.62, "intermediarias": 41293.95, "quitacao": 550585.96},
+{"unidade": "501", "andar": "5", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1101171.92, "sinal": 165175.79, "mensais": 6117.62, "intermediarias": 41293.95, "quitacao": 550585.96},
+{"unidade": "502", "andar": "5", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1011649.58, "sinal": 151747.44, "mensais": 5620.28, "intermediarias": 37936.86, "quitacao": 505824.79},
+{"unidade": "503", "andar": "5", "area": 67.75, "areaTotal": 149.47, "vagas": 1, "valor": 1065929.38, "sinal": 159889.41, "mensais": 5921.83, "intermediarias": 39972.35, "quitacao": 532964.69},
+{"unidade": "504", "andar": "5", "area": 65.43, "areaTotal": 145.31, "vagas": 1, "valor": 1029428.18, "sinal": 154414.23, "mensais": 5719.05, "intermediarias": 38603.56, "quitacao": 514714.09},
+{"unidade": "505", "andar": "5", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1011649.58, "sinal": 151747.44, "mensais": 5620.28, "intermediarias": 37936.86, "quitacao": 505824.79},
+{"unidade": "506", "andar": "5", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1101171.92, "sinal": 165175.79, "mensais": 6117.62, "intermediarias": 41293.95, "quitacao": 550585.96},
+{"unidade": "507", "andar": "5", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1112183.64, "sinal": 166827.55, "mensais": 6178.8, "intermediarias": 41706.89, "quitacao": 556091.82},
+{"unidade": "508", "andar": "5", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1021766.08, "sinal": 153264.91, "mensais": 5676.48, "intermediarias": 38316.23, "quitacao": 510883.04},
+{"unidade": "509", "andar": "5", "area": 64.22, "areaTotal": 143.19, "vagas": 1, "valor": 1020494.83, "sinal": 153074.22, "mensais": 5669.42, "intermediarias": 38268.56, "quitacao": 510247.41},
+{"unidade": "510", "andar": "5", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1071662.59, "sinal": 160749.39, "mensais": 5953.68, "intermediarias": 40187.35, "quitacao": 535831.29},
+{"unidade": "511", "andar": "5", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1071662.59, "sinal": 160749.39, "mensais": 5953.68, "intermediarias": 40187.35, "quitacao": 535831.29},
+{"unidade": "512", "andar": "5", "area": 68.62, "areaTotal": 151.1, "vagas": 1, "valor": 1090413.5, "sinal": 163562.03, "mensais": 6057.85, "intermediarias": 40890.51, "quitacao": 545206.75},
+{"unidade": "513", "andar": "5", "area": 65.39, "areaTotal": 145.27, "vagas": 1, "valor": 1039086.84, "sinal": 155863.03, "mensais": 5772.7, "intermediarias": 38965.76, "quitacao": 519543.42},
+{"unidade": "514", "andar": "5", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1021766.08, "sinal": 153264.91, "mensais": 5676.48, "intermediarias": 38316.23, "quitacao": 510883.04},
+{"unidade": "515", "andar": "5", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1112183.64, "sinal": 166827.55, "mensais": 6178.8, "intermediarias": 41706.89, "quitacao": 556091.82},
+{"unidade": "601", "andar": "6", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1112183.64, "sinal": 166827.55, "mensais": 6178.8, "intermediarias": 41706.89, "quitacao": 556091.82},
+{"unidade": "602", "andar": "6", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1021766.08, "sinal": 153264.91, "mensais": 5676.48, "intermediarias": 38316.23, "quitacao": 510883.04},
+{"unidade": "603", "andar": "6", "area": 67.75, "areaTotal": 149.47, "vagas": 1, "valor": 1076588.68, "sinal": 161488.3, "mensais": 5981.05, "intermediarias": 40372.08, "quitacao": 538294.34},
+{"unidade": "604", "andar": "6", "area": 65.43, "areaTotal": 145.31, "vagas": 1, "valor": 1039722.47, "sinal": 155958.37, "mensais": 5776.24, "intermediarias": 38989.59, "quitacao": 519861.23},
+{"unidade": "605", "andar": "6", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1021766.08, "sinal": 153264.91, "mensais": 5676.48, "intermediarias": 38316.23, "quitacao": 510883.04},
+{"unidade": "606", "andar": "6", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1112183.64, "sinal": 166827.55, "mensais": 6178.8, "intermediarias": 41706.89, "quitacao": 556091.82},
+{"unidade": "607", "andar": "6", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1123305.47, "sinal": 168495.82, "mensais": 6240.59, "intermediarias": 42123.96, "quitacao": 561652.74},
+{"unidade": "608", "andar": "6", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1031983.74, "sinal": 154797.56, "mensais": 5733.24, "intermediarias": 38699.39, "quitacao": 515991.87},
+{"unidade": "609", "andar": "6", "area": 64.22, "areaTotal": 143.19, "vagas": 1, "valor": 1030699.78, "sinal": 154604.97, "mensais": 5726.11, "intermediarias": 38651.24, "quitacao": 515349.89},
+{"unidade": "610", "andar": "6", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1082379.21, "sinal": 162356.88, "mensais": 6013.22, "intermediarias": 40589.22, "quitacao": 541189.61},
+{"unidade": "611", "andar": "6", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1082379.21, "sinal": 162356.88, "mensais": 6013.22, "intermediarias": 40589.22, "quitacao": 541189.61},
+{"unidade": "612", "andar": "6", "area": 68.62, "areaTotal": 151.1, "vagas": 1, "valor": 1101317.64, "sinal": 165197.65, "mensais": 6118.43, "intermediarias": 41299.41, "quitacao": 550658.82},
+{"unidade": "613", "andar": "6", "area": 65.39, "areaTotal": 145.27, "vagas": 1, "valor": 1049477.71, "sinal": 157421.66, "mensais": 5830.43, "intermediarias": 39355.41, "quitacao": 524738.85},
+{"unidade": "614", "andar": "6", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1031983.74, "sinal": 154797.56, "mensais": 5733.24, "intermediarias": 38699.39, "quitacao": 515991.87},
+{"unidade": "615", "andar": "6", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1123305.47, "sinal": 168495.82, "mensais": 6240.59, "intermediarias": 42123.96, "quitacao": 561652.74},
+{"unidade": "701", "andar": "7", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1123305.47, "sinal": 168495.82, "mensais": 6240.59, "intermediarias": 42123.96, "quitacao": 561652.74},
+{"unidade": "702", "andar": "7", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1031983.74, "sinal": 154797.56, "mensais": 5733.24, "intermediarias": 38699.39, "quitacao": 515991.87},
+{"unidade": "703", "andar": "7", "area": 67.75, "areaTotal": 149.47, "vagas": 1, "valor": 1087354.56, "sinal": 163103.18, "mensais": 6040.86, "intermediarias": 40775.8, "quitacao": 543677.28},
+{"unidade": "704", "andar": "7", "area": 65.43, "areaTotal": 145.31, "vagas": 1, "valor": 1050119.69, "sinal": 157517.95, "mensais": 5834.0, "intermediarias": 39379.49, "quitacao": 525059.84},
+{"unidade": "705", "andar": "7", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1031983.74, "sinal": 154797.56, "mensais": 5733.24, "intermediarias": 38699.39, "quitacao": 515991.87},
+{"unidade": "706", "andar": "7", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1123305.47, "sinal": 168495.82, "mensais": 6240.59, "intermediarias": 42123.96, "quitacao": 561652.74},
+{"unidade": "707", "andar": "7", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1134538.53, "sinal": 170180.78, "mensais": 6302.99, "intermediarias": 42545.19, "quitacao": 567269.26},
+{"unidade": "708", "andar": "7", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1042303.58, "sinal": 156345.54, "mensais": 5790.58, "intermediarias": 39086.38, "quitacao": 521151.79},
+{"unidade": "709", "andar": "7", "area": 64.22, "areaTotal": 143.19, "vagas": 1, "valor": 1041006.78, "sinal": 156151.02, "mensais": 5783.37, "intermediarias": 39037.75, "quitacao": 520503.39},
+{"unidade": "710", "andar": "7", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1093203.0, "sinal": 163980.45, "mensais": 6073.35, "intermediarias": 40995.11, "quitacao": 546601.5},
+{"unidade": "711", "andar": "7", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1093203.0, "sinal": 163980.45, "mensais": 6073.35, "intermediarias": 40995.11, "quitacao": 546601.5},
+{"unidade": "712", "andar": "7", "area": 68.62, "areaTotal": 151.1, "vagas": 1, "valor": 1112330.82, "sinal": 166849.62, "mensais": 6179.62, "intermediarias": 41712.41, "quitacao": 556165.41},
+{"unidade": "713", "andar": "7", "area": 65.39, "areaTotal": 145.27, "vagas": 1, "valor": 1059972.49, "sinal": 158995.87, "mensais": 5888.74, "intermediarias": 39748.97, "quitacao": 529986.24},
+{"unidade": "714", "andar": "7", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1042303.58, "sinal": 156345.54, "mensais": 5790.58, "intermediarias": 39086.38, "quitacao": 521151.79},
+{"unidade": "715", "andar": "7", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1134538.53, "sinal": 170180.78, "mensais": 6302.99, "intermediarias": 42545.19, "quitacao": 567269.26},
+{"unidade": "801", "andar": "8", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1123305.47, "sinal": 168495.82, "mensais": 6240.59, "intermediarias": 42123.96, "quitacao": 561652.74},
+{"unidade": "802", "andar": "8", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1031983.74, "sinal": 154797.56, "mensais": 5733.24, "intermediarias": 38699.39, "quitacao": 515991.87},
+{"unidade": "803", "andar": "8", "area": 67.75, "areaTotal": 149.47, "vagas": 1, "valor": 1087354.56, "sinal": 163103.18, "mensais": 6040.86, "intermediarias": 40775.8, "quitacao": 543677.28},
+{"unidade": "804", "andar": "8", "area": 65.43, "areaTotal": 145.31, "vagas": 1, "valor": 1050119.69, "sinal": 157517.95, "mensais": 5834.0, "intermediarias": 39379.49, "quitacao": 525059.84},
+{"unidade": "805", "andar": "8", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1031983.74, "sinal": 154797.56, "mensais": 5733.24, "intermediarias": 38699.39, "quitacao": 515991.87},
+{"unidade": "806", "andar": "8", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1123305.47, "sinal": 168495.82, "mensais": 6240.59, "intermediarias": 42123.96, "quitacao": 561652.74},
+{"unidade": "807", "andar": "8", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1134538.53, "sinal": 170180.78, "mensais": 6302.99, "intermediarias": 42545.19, "quitacao": 567269.26},
+{"unidade": "808", "andar": "8", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1042303.58, "sinal": 156345.54, "mensais": 5790.58, "intermediarias": 39086.38, "quitacao": 521151.79},
+{"unidade": "809", "andar": "8", "area": 64.22, "areaTotal": 143.19, "vagas": 1, "valor": 1041006.78, "sinal": 156151.02, "mensais": 5783.37, "intermediarias": 39037.75, "quitacao": 520503.39},
+{"unidade": "810", "andar": "8", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1093203.0, "sinal": 163980.45, "mensais": 6073.35, "intermediarias": 40995.11, "quitacao": 546601.5},
+{"unidade": "811", "andar": "8", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1093203.0, "sinal": 163980.45, "mensais": 6073.35, "intermediarias": 40995.11, "quitacao": 546601.5},
+{"unidade": "812", "andar": "8", "area": 68.62, "areaTotal": 151.1, "vagas": 1, "valor": 1112330.82, "sinal": 166849.62, "mensais": 6179.62, "intermediarias": 41712.41, "quitacao": 556165.41},
+{"unidade": "813", "andar": "8", "area": 65.39, "areaTotal": 145.27, "vagas": 1, "valor": 1059972.49, "sinal": 158995.87, "mensais": 5888.74, "intermediarias": 39748.97, "quitacao": 529986.24},
+{"unidade": "814", "andar": "8", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1042303.58, "sinal": 156345.54, "mensais": 5790.58, "intermediarias": 39086.38, "quitacao": 521151.79},
+{"unidade": "815", "andar": "8", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1134538.53, "sinal": 170180.78, "mensais": 6302.99, "intermediarias": 42545.19, "quitacao": 567269.26},
+{"unidade": "901", "andar": "9", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1123305.47, "sinal": 168495.82, "mensais": 6240.59, "intermediarias": 42123.96, "quitacao": 561652.74},
+{"unidade": "902", "andar": "9", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1031983.74, "sinal": 154797.56, "mensais": 5733.24, "intermediarias": 38699.39, "quitacao": 515991.87},
+{"unidade": "903", "andar": "9", "area": 67.75, "areaTotal": 149.47, "vagas": 1, "valor": 1087354.56, "sinal": 163103.18, "mensais": 6040.86, "intermediarias": 40775.8, "quitacao": 543677.28},
+{"unidade": "904", "andar": "9", "area": 65.43, "areaTotal": 145.31, "vagas": 1, "valor": 1050119.69, "sinal": 157517.95, "mensais": 5834.0, "intermediarias": 39379.49, "quitacao": 525059.84},
+{"unidade": "905", "andar": "9", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1031983.74, "sinal": 154797.56, "mensais": 5733.24, "intermediarias": 38699.39, "quitacao": 515991.87},
+{"unidade": "906", "andar": "9", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1123305.47, "sinal": 168495.82, "mensais": 6240.59, "intermediarias": 42123.96, "quitacao": 561652.74},
+{"unidade": "907", "andar": "9", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1134538.53, "sinal": 170180.78, "mensais": 6302.99, "intermediarias": 42545.19, "quitacao": 567269.26},
+{"unidade": "908", "andar": "9", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1042303.58, "sinal": 156345.54, "mensais": 5790.58, "intermediarias": 39086.38, "quitacao": 521151.79},
+{"unidade": "909", "andar": "9", "area": 64.22, "areaTotal": 143.19, "vagas": 1, "valor": 1041006.78, "sinal": 156151.02, "mensais": 5783.37, "intermediarias": 39037.75, "quitacao": 520503.39},
+{"unidade": "910", "andar": "9", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1093203.0, "sinal": 163980.45, "mensais": 6073.35, "intermediarias": 40995.11, "quitacao": 546601.5},
+{"unidade": "911", "andar": "9", "area": 67.44, "areaTotal": 149.01, "vagas": 1, "valor": 1093203.0, "sinal": 163980.45, "mensais": 6073.35, "intermediarias": 40995.11, "quitacao": 546601.5},
+{"unidade": "912", "andar": "9", "area": 68.62, "areaTotal": 151.1, "vagas": 1, "valor": 1112330.82, "sinal": 166849.62, "mensais": 6179.62, "intermediarias": 41712.41, "quitacao": 556165.41},
+{"unidade": "913", "andar": "9", "area": 65.39, "areaTotal": 145.27, "vagas": 1, "valor": 1059972.49, "sinal": 158995.87, "mensais": 5888.74, "intermediarias": 39748.97, "quitacao": 529986.24},
+{"unidade": "914", "andar": "9", "area": 64.3, "areaTotal": 143.42, "vagas": 1, "valor": 1042303.58, "sinal": 156345.54, "mensais": 5790.58, "intermediarias": 39086.38, "quitacao": 521151.79},
+{"unidade": "915", "andar": "9", "area": 69.99, "areaTotal": 153.54, "vagas": 1, "valor": 1134538.53, "sinal": 170180.78, "mensais": 6302.99, "intermediarias": 42545.19, "quitacao": 567269.26}];
+let currentSimulator = 'TResidence';
+let UNITS = UNITS_TRESIDENCE;
+
+
+function switchSimulator(sim) {
+  try {
+  currentSimulator = sim;
+  console.log("Switching to", sim);
+  
+  if (sim === 'TResidence') {
+    UNITS = UNITS_TRESIDENCE;
+    document.getElementById('mainTitle').textContent = 'Simulador de Compra – TIMELESS RESIDENCE';
+    document.getElementById('mainAddress').textContent = 'Endereço: Rua Tanzania, Jardim Aclimatação – CBMC Incorporadora';
+  } else if (sim === 'CBMC') {
+    UNITS = UNITS_CBMC;
+    document.getElementById('mainTitle').textContent = 'Simulador de Compra – MEDICAL CBMC';
+    document.getElementById('mainAddress').textContent = 'Endereço: Venda Medical CBMC';
+  }
+  
+  // Reset UI
+  const selAndar = document.getElementById('selAndar');
+  selAndar.innerHTML = '<option value="">— Selecione o andar —</option>';
+  const floors = [...new Set(UNITS.map(u => u.andar))].sort((a,b) => +a - +b);
+  floors.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f;
+    opt.text = `${f}º Andar`;
+    selAndar.appendChild(opt);
+  });
+  
+  const selU = document.getElementById('selUnidade');
+  selU.innerHTML = '<option value="">— Selecione a unidade —</option>';
+  selU.disabled = true;
+  document.getElementById('unitInfo').classList.remove('visible');
+  document.getElementById('summaryBar').classList.remove('visible');
+  document.getElementById('resultSection').classList.remove('visible');
+  
+  // Clear proposed units
+  _proposalUnits = [];
+  renderUnitList();
+  document.getElementById('unitListSection').classList.remove('visible');
+  document.getElementById('consolidatedSummary').style.display='none';
+  document.getElementById('consolidatedPrint').style.display='none';
+  
+  // clear live bar
+  const liveTotalBar = document.getElementById('liveTotalBar');
+  if (liveTotalBar) liveTotalBar.classList.remove('visible');
+  } catch (err) { console.error("Error in switchSimulator:", err); }
+}
 const fmt = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtMoney = v => 'R$ '+fmt(v);
 function addMonths(dateStr,months){const[y,m,d]=dateStr.split('-').map(Number);const dt=new Date(y,m-1+months,d);return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
@@ -634,7 +856,7 @@ function exportExcel(){
   const u=window._simUnit;
   const wb=XLSX.utils.book_new();
   const resumo=[
-    ['SIMULAÇÃO DE COMPRA – TIMELESS RESIDENCE'],[],
+    ['SIMULAÇÃO DE COMPRA – ' + (currentSimulator === 'TResidence' ? 'TIMELESS RESIDENCE' : 'MEDICAL CBMC')],[],
     ['Proponente:',document.getElementById('nomeProponente').value],
     ['CPF/CNPJ:',document.getElementById('cpf').value],
     ['Telefone:',document.getElementById('telefone').value],
@@ -662,7 +884,7 @@ function exportExcel(){
   const ws2=XLSX.utils.aoa_to_sheet(fluxo);ws2['!cols']=[{wch:5},{wch:14},{wch:18},{wch:26},{wch:18}];
   XLSX.utils.book_append_sheet(wb,ws2,'Fluxo de Pagamento');
   const nome=(document.getElementById('nomeProponente').value||'simulacao').replace(/\s+/g,'_');
-  XLSX.writeFile(wb,`Simulacao_TIMELESS_${u.unidade}_${nome}.xlsx`);
+  XLSX.writeFile(wb,`Simulacao_${currentSimulator === 'TResidence' ? 'TIMELESS' : 'CBMC'}_${u.unidade}_${nome}.xlsx`);
 }
 </script>
 </body>
