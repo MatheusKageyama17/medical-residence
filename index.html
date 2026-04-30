@@ -794,7 +794,7 @@ function onUnidadeSelected(){
   const u=UNITS.find(x=>x.unidade===unid);
   document.getElementById('infoArea').textContent=u.area+' m²';
   document.getElementById('infoAreaTotal').textContent=u.areaTotal+' m²';
-  document.getElementById('infoVagas').textContent=u.vagas+' vaga(s)';
+  document.getElementById('infoVagas').textContent=u.vagas + (u.vagas === 1 ? ' vaga' : ' vagas');
   document.getElementById('infoValor').textContent=fmtMoney(u.valor);
   document.getElementById('unitInfo').classList.add('visible');
   recalcConditions();
@@ -927,7 +927,7 @@ function renderUnitList(){
   const container=document.getElementById('unitCardList');container.innerHTML='';
   _proposalUnits.forEach((pu,i)=>{
     const div=document.createElement('div');div.className='unit-card';
-    div.innerHTML=`<div class="unit-card-info"><div class="unit-card-title">Unidade ${pu.unidade} &nbsp;|&nbsp; ${pu.area} m² priv. / ${pu.areaTotal} m² total | ${pu.vagas} vaga(s)</div><div class="unit-card-detail">Valor Tabela: ${fmtMoney(pu.valorTabela)} &nbsp;·&nbsp; Sinal: ${fmtMoney(pu.valS*pu.qtdS)} &nbsp;·&nbsp; Mensais: ${fmtMoney(pu.valM*pu.qtdM)} (${pu.qtdM}x) &nbsp;·&nbsp; Intermediárias: ${fmtMoney(pu.valI*pu.qtdI)} (${pu.qtdI}x) &nbsp;·&nbsp; Quitação: ${fmtMoney(pu.valQ*pu.qtdQ)} &nbsp;·&nbsp; <strong>Total: ${fmtMoney(pu.totalProposta)}</strong></div></div><button class="unit-card-remove" onclick="removeUnit(${i})">✕ Remover</button>`;
+    div.innerHTML=`<div class="unit-card-info"><div class="unit-card-title">Unidade ${pu.unidade} &nbsp;|&nbsp; ${pu.area} m² priv. / ${pu.areaTotal} m² total | ${pu.vagas} ${pu.vagas === 1 ? 'vaga' : 'vagas'}</div><div class="unit-card-detail">Valor Tabela: ${fmtMoney(pu.valorTabela)} &nbsp;·&nbsp; Sinal: ${fmtMoney(pu.valS*pu.qtdS)} &nbsp;·&nbsp; Mensais: ${fmtMoney(pu.valM*pu.qtdM)} (${pu.qtdM}x) &nbsp;·&nbsp; Intermediárias: ${fmtMoney(pu.valI*pu.qtdI)} (${pu.qtdI}x) &nbsp;·&nbsp; Quitação: ${fmtMoney(pu.valQ*pu.qtdQ)} &nbsp;·&nbsp; <strong>Total: ${fmtMoney(pu.totalProposta)}</strong></div></div><button class="unit-card-remove" onclick="removeUnit(${i})">✕ Remover</button>`;
     container.appendChild(div);
   });
 }
