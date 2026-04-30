@@ -166,6 +166,102 @@ td,th{padding:5px 8px !important;}
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
+    /* Adaptações para Celular (Responsividade) */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px 20px;
+        gap: 12px;
+      }
+      
+      header h1 {
+        font-size: 18px;
+      }
+      
+      .form-row.cols-3, 
+      .form-row.cols-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .cond-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .simulator-tabs {
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 0;
+      }
+      
+      .sim-tab {
+        width: 100%;
+        text-align: center;
+      }
+      
+      .live-total-cell {
+        min-width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      
+      .live-total-cell:last-child {
+        border-bottom: none;
+      }
+      
+      .btn-row {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+      
+      .summary-item {
+        min-width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 10px 12px;
+      }
+      
+      .summary-item:last-child {
+        border-bottom: none;
+      }
+
+      /* Evita zoom automático no iOS Safari ao focar em inputs/selects */
+      .field input, .field select, .field textarea, .cond-custom input {
+        font-size: 16px !important;
+        padding: 12px !important;
+      }
+      
+      .cond-custom {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      /* Permite rolagem horizontal em tabelas no celular */
+      .table-responsive-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      table {
+        min-width: 600px; /* Garante que a tabela não quebre o layout e possibilite o scroll */
+      }
+      
+      .signature-section {
+        flex-direction: column !important;
+        gap: 20px !important;
+      }
+      
+      .consol-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .unit-info.visible {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
 </style>
 </head>
 <body>
