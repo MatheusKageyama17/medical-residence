@@ -785,7 +785,13 @@ function updateUnidades(){
   document.getElementById('unitInfo').classList.remove('visible');
   if(!andar)return;
   const units=UNITS.filter(u=>u.andar===andar);
-  units.forEach(u=>{const opt=document.createElement('option');opt.value=u.unidade;opt.text=`Unidade ${u.unidade} – ${u.area}m² priv.`;selU.appendChild(opt);});
+  units.forEach(u=>{
+    const opt=document.createElement('option');
+    opt.value=u.unidade;
+    const vagasText = u.vagas ? ` – ${u.vagas} ${u.vagas === 1 ? 'vaga' : 'vagas'}` : '';
+    opt.text=`Unidade ${u.unidade} – ${u.area}m² priv.` + vagasText;
+    selU.appendChild(opt);
+  });
   selU.disabled=false;
 }
 function onUnidadeSelected(){
@@ -794,7 +800,7 @@ function onUnidadeSelected(){
   const u=UNITS.find(x=>x.unidade===unid);
   document.getElementById('infoArea').textContent=u.area+' m²';
   document.getElementById('infoAreaTotal').textContent=u.areaTotal+' m²';
-  document.getElementById('infoVagas').textContent=u.vagas + (u.vagas === 1 ? ' vaga' : ' vagas');
+  document.getElementById('infoVagas').textContent = u.vagas ? (u.vagas + (u.vagas === 1 ? ' vaga' : ' vagas')) : 'Sem vaga';
   document.getElementById('infoValor').textContent=fmtMoney(u.valor);
   document.getElementById('unitInfo').classList.add('visible');
   recalcConditions();
@@ -927,7 +933,8 @@ function renderUnitList(){
   const container=document.getElementById('unitCardList');container.innerHTML='';
   _proposalUnits.forEach((pu,i)=>{
     const div=document.createElement('div');div.className='unit-card';
-    div.innerHTML=`<div class="unit-card-info"><div class="unit-card-title">Unidade ${pu.unidade} &nbsp;|&nbsp; ${pu.area} m² priv. / ${pu.areaTotal} m² total | ${pu.vagas} ${pu.vagas === 1 ? 'vaga' : 'vagas'}</div><div class="unit-card-detail">Valor Tabela: ${fmtMoney(pu.valorTabela)} &nbsp;·&nbsp; Sinal: ${fmtMoney(pu.valS*pu.qtdS)} &nbsp;·&nbsp; Mensais: ${fmtMoney(pu.valM*pu.qtdM)} (${pu.qtdM}x) &nbsp;·&nbsp; Intermediárias: ${fmtMoney(pu.valI*pu.qtdI)} (${pu.qtdI}x) &nbsp;·&nbsp; Quitação: ${fmtMoney(pu.valQ*pu.qtdQ)} &nbsp;·&nbsp; <strong>Total: ${fmtMoney(pu.totalProposta)}</strong></div></div><button class="unit-card-remove" onclick="removeUnit(${i})">✕ Remover</button>`;
+    const vagasText = pu.vagas ? ` | ${pu.vagas} ${pu.vagas === 1 ? 'vaga' : 'vagas'}` : '';
+    div.innerHTML=`<div class="unit-card-info"><div class="unit-card-title">Unidade ${pu.unidade} &nbsp;|&nbsp; ${pu.area} m² priv. / ${pu.areaTotal} m² total${vagasText}</div><div class="unit-card-detail">Valor Tabela: ${fmtMoney(pu.valorTabela)} &nbsp;·&nbsp; Sinal: ${fmtMoney(pu.valS*pu.qtdS)} &nbsp;·&nbsp; Mensais: ${fmtMoney(pu.valM*pu.qtdM)} (${pu.qtdM}x) &nbsp;·&nbsp; Intermediárias: ${fmtMoney(pu.valI*pu.qtdI)} (${pu.qtdI}x) &nbsp;·&nbsp; Quitação: ${fmtMoney(pu.valQ*pu.qtdQ)} &nbsp;·&nbsp; <strong>Total: ${fmtMoney(pu.totalProposta)}</strong></div></div><button class="unit-card-remove" onclick="removeUnit(${i})">✕ Remover</button>`;
     container.appendChild(div);
   });
 }
@@ -943,7 +950,7 @@ function updateConsolidated(){
   grid.innerHTML=[['Unidades',_proposalUnits.length],['Valor Tabela Total',fmtMoney(totValor)],['Total Sinal',fmtMoney(totSinal)],['Total Mensais',fmtMoney(totMensais)],['Total Intermediárias',fmtMoney(totInterm)],['Total Quitação',fmtMoney(totQuitacao)],['💰 Total Geral',fmtMoney(totGeral)]].map(([l,v])=>`<div class="consol-cell"><span>${l}</span><strong>${v}</strong></div>`).join('');
   document.getElementById('consolidatedSummary').style.display='block';
   const tbody=document.getElementById('consolPrintBody');
-  tbody.innerHTML=_proposalUnits.map(pu=>`<tr><td>${pu.unidade}</td><td>${pu.area}</td><td>${pu.areaTotal}</td><td>${pu.vagas}</td><td>${fmtMoney(pu.valorTabela)}</td><td>${fmtMoney(pu.valS*pu.qtdS)}</td><td>${fmtMoney(pu.valM*pu.qtdM)} (${pu.qtdM}x)</td><td>${fmtMoney(pu.valI*pu.qtdI)} (${pu.qtdI}x)</td><td>${fmtMoney(pu.valQ*pu.qtdQ)}</td></tr>`).join('');
+  tbody.innerHTML=_proposalUnits.map(pu=>`<tr><td>${pu.unidade}</td><td>${pu.area}</td><td>${pu.areaTotal}</td><td>${pu.vagas ? pu.vagas : '-'}</td><td>${fmtMoney(pu.valorTabela)}</td><td>${fmtMoney(pu.valS*pu.qtdS)}</td><td>${fmtMoney(pu.valM*pu.qtdM)} (${pu.qtdM}x)</td><td>${fmtMoney(pu.valI*pu.qtdI)} (${pu.qtdI}x)</td><td>${fmtMoney(pu.valQ*pu.qtdQ)}</td></tr>`).join('');
   document.getElementById('consolPrintFoot').innerHTML=`<td><strong>TOTAL (${_proposalUnits.length} unidades)</strong></td><td></td><td></td><td></td><td>${fmtMoney(totValor)}</td><td>${fmtMoney(totSinal)}</td><td>${fmtMoney(totMensais)}</td><td>${fmtMoney(totInterm)}</td><td>${fmtMoney(totQuitacao)}</td>`;
   document.getElementById('consolidatedPrint').style.display='block';
 }
@@ -963,7 +970,7 @@ function exportExcel(){
     ['UNIDADE SELECIONADA'],
     ['Unidade:',u.unidade],['Andar:',u.andar+'º'],
     ['Área Privativa:',u.area+' m²'],['Área Total:',u.areaTotal+' m²'],
-    ['Vagas:',u.vagas],['Valor Total:',u.valor],[],
+    ['Vagas:',u.vagas ? u.vagas : 'Sem vaga'],['Valor Total:',u.valor],[],
     ['RESUMO DO PAGAMENTO'],
     ['Tipo','% do Valor','Qtd Parcelas','Valor p/ Parcela','Total'],
     ['Sinal',document.getElementById('pctSinal').value,document.getElementById('qtdSinal').value,parseVal(document.getElementById('custSinal').value),parseVal(document.getElementById('custSinal').value)*(+document.getElementById('qtdSinal').value||1)],
