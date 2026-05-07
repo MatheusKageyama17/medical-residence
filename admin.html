@@ -113,14 +113,23 @@
       auth.signOut();
     }
 
+    let currentRef = null;
+
     function loadUnits() {
       if(!auth.currentUser) return;
       const emp = document.getElementById('empreendimentoSelect').value;
       const tbody = document.getElementById('unitsBody');
       tbody.innerHTML = '<tr><td colspan="3">Carregando dados...</td></tr>';
       
+      // Limpa o listener anterior se houver, para evitar sobreposição ao trocar de empreendimento
+      if (currentRef) {
+        currentRef.off('value');
+      }
+      
+      currentRef = db.ref('disponibilidade/' + emp);
+      
       // Lê o status das unidades do banco de dados
-      db.ref('disponibilidade/' + emp).on('value', (snapshot) => {
+      currentRef.on('value', (snapshot) => {
         const data = snapshot.val() || {};
         renderTable(data, emp);
       });
@@ -131,18 +140,19 @@
     // Para simplificar, quando carregar, ele vai buscar a lista.
     function renderTable(data, emp) {
         const tbody = document.getElementById('unitsBody');
-        tbody.innerHTML = '';
         
         const baseUnits = emp === 'CBMC' ? UNITS_CBMC : UNITS_TRESIDENCE;
         const allUnits = baseUnits.map(u => u.unidade);
         
+        let htmlContent = '';
+        
         allUnits.forEach(unidade => {
             const status = data[unidade] || 'Disponível';
             const btnClass = status === 'Disponível' ? 'btn-vendido' : 'btn-disp';
-            const btnText = status === 'Disponível' ? 'Marcar como VENDIDO' : 'Marcar como DISPONÍVEL';
+            const btnText = status === 'Disponível' ? 'Marcar como VENDIDO' : 'Reverter para DISPONÍVEL';
             const newStatus = status === 'Disponível' ? 'Vendido' : 'Disponível';
 
-            tbody.innerHTML += `
+            htmlContent += `
               <tr>
                 <td>Unidade ${unidade}</td>
                 <td><strong>${status}</strong></td>
@@ -154,9 +164,20 @@
               </tr>
             `;
         });
+        
+        tbody.innerHTML = htmlContent;
     }
 
     function mudarStatus(emp, unidade, novoStatus) {
+        if (novoStatus === 'Vendido') {
+            if (!confirm(`Tem certeza que deseja marcar a Unidade ${unidade} como VENDIDA?\n\nEla deixará de aparecer no simulador.`)) {
+                return;
+            }
+        } else {
+            if (!confirm(`Deseja REVERTER a Unidade ${unidade} para DISPONÍVEL?\n\nEla voltará a aparecer no simulador.`)) {
+                return;
+            }
+        }
         db.ref('disponibilidade/' + emp + '/' + unidade).set(novoStatus);
     }
   </script>
