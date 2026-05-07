@@ -16,6 +16,18 @@
     .btn-disp { background: #1A7A4A; color: white; }
     .btn-vendido { background: #C0392B; color: white; }
     select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
+    .table-responsive { overflow-x: auto; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; min-width: 400px; }
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .container { padding: 15px; }
+      #loginSection input { width: 100%; margin-bottom: 10px; box-sizing: border-box; }
+      #loginSection button { width: 100%; }
+      h1 { font-size: 20px; }
+      th, td { padding: 8px; font-size: 13px; }
+      .btn { font-size: 12px; padding: 6px 8px; width: 100%; margin-top: 4px; }
+      select { width: 100%; }
+    }
   </style>
   <!-- FIREBASE SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -40,18 +52,20 @@
 
     <div id="adminPanel" style="display: none;">
       <button class="btn btn-vendido" onclick="fazerLogout()" style="float:right;">Sair</button>
-      <table id="unitsTable">
-        <thead>
-          <tr>
-            <th>Unidade</th>
-            <th>Status Atual</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody id="unitsBody">
-          <!-- Unidades carregadas aqui via JS -->
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table id="unitsTable">
+          <thead>
+            <tr>
+              <th>Unidade</th>
+              <th>Status Atual</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="unitsBody">
+            <!-- Unidades carregadas aqui via JS -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 

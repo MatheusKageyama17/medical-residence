@@ -262,6 +262,40 @@ td,th{padding:5px 8px !important;}
         grid-template-columns: 1fr 1fr;
       }
     }
+    /* Estilo do botão de admin acessível e aparente */
+    .admin-shortcut {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(44, 62, 122, 0.15);
+      color: #2C3E7A;
+      padding: 8px 12px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(44, 62, 122, 0.2);
+      transition: all 0.2s ease;
+      z-index: 9999;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .admin-shortcut:hover {
+      background: rgba(44, 62, 122, 0.9);
+      color: white;
+      border-color: #2C3E7A;
+    }
+    @media (max-width: 768px) {
+      .admin-shortcut {
+        bottom: 15px;
+        right: 15px;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+    }
   </style>
   <!-- FIREBASE SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -773,7 +807,13 @@ function exportExcel(){
   XLSX.writeFile(wb,`Simulacao_${currentSimulator === 'TResidence' ? 'TIMELESS' : 'CBMC'}_${u.unidade}_${nome}.xlsx`);
 }
 </script>
-  <a href="admin.html" style="position:fixed; bottom:15px; right:15px; opacity:0.3; text-decoration:none; font-size:16px; z-index:9999;" class="no-print" title="Painel do Administrador">🔒</a>
+  <a href="admin.html" class="admin-shortcut no-print" title="Painel do Administrador">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+    </svg>
+    <span>Admin</span>
+  </a>
 </body>
 </html>
 
