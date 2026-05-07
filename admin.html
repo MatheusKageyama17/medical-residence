@@ -51,7 +51,9 @@
     </div>
 
     <div id="adminPanel" style="display: none;">
-      <button class="btn btn-vendido" onclick="fazerLogout()" style="float:right;">Sair</button>
+      <div style="text-align: right; margin-bottom: 15px; margin-top: 15px;">
+        <button class="btn btn-vendido" onclick="fazerLogout()">Sair</button>
+      </div>
       <div class="table-responsive">
         <table id="unitsTable">
           <thead>
@@ -116,7 +118,7 @@
     let currentRef = null;
 
     function loadUnits() {
-      if(!auth.currentUser) return;
+      // Removemos o check de auth.currentUser pois no mobile às vezes ele tem delay e causa erro
       const emp = document.getElementById('empreendimentoSelect').value;
       const tbody = document.getElementById('unitsBody');
       tbody.innerHTML = '<tr><td colspan="3">Carregando dados...</td></tr>';
@@ -132,6 +134,9 @@
       currentRef.on('value', (snapshot) => {
         const data = snapshot.val() || {};
         renderTable(data, emp);
+      }, (error) => {
+        console.error("Erro do Firebase:", error);
+        tbody.innerHTML = `<tr><td colspan="3" style="color:red;">Erro ao carregar dados: ${error.message}</td></tr>`;
       });
     }
 
