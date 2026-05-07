@@ -51,8 +51,9 @@
     </div>
 
     <div id="adminPanel" style="display: none;">
-      <div style="text-align: right; margin-bottom: 15px; margin-top: 15px;">
-        <button class="btn btn-vendido" onclick="fazerLogout()">Sair</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; margin-top: 15px; gap: 10px;">
+        <input type="text" id="searchInput" onkeyup="filterUnits()" placeholder="Pesquisar unidade..." style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; flex: 1; max-width: 300px;">
+        <button class="btn btn-vendido" onclick="fazerLogout()" style="white-space: nowrap;">Sair</button>
       </div>
       <div class="table-responsive">
         <table id="unitsTable">
@@ -171,6 +172,7 @@
         });
         
         tbody.innerHTML = htmlContent;
+        filterUnits(); // Reaplica o filtro caso a pessoa já tenha digitado algo
     }
 
     function mudarStatus(emp, unidade, novoStatus) {
@@ -184,6 +186,26 @@
             }
         }
         db.ref('disponibilidade/' + emp + '/' + unidade).set(novoStatus);
+    }
+
+    function filterUnits() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toUpperCase();
+        const tbody = document.getElementById("unitsBody");
+        const trs = tbody.getElementsByTagName("tr");
+        
+        for (let i = 0; i < trs.length; i++) {
+            const tdUnidade = trs[i].getElementsByTagName("td")[0];
+            if (tdUnidade) {
+                const txtValue = tdUnidade.textContent || tdUnidade.innerText;
+                // Procura a string de busca dentro do texto da célula da unidade
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    trs[i].style.display = "";
+                } else {
+                    trs[i].style.display = "none";
+                }
+            }       
+        }
     }
   </script>
 </body>
