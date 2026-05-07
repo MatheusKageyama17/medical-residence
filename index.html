@@ -262,7 +262,10 @@ td,th{padding:5px 8px !important;}
         grid-template-columns: 1fr 1fr;
       }
     }
-</style>
+  </style>
+  <!-- FIREBASE SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 <header>
@@ -718,6 +721,28 @@ const UNITS_CBMC = [{"unidade": "101", "andar": "1", "area": 69.99, "areaTotal":
 let currentSimulator = 'TResidence';
 let UNITS = UNITS_TRESIDENCE;
 
+const firebaseConfig = {
+  apiKey: "AIzaSyAgdIE4CXYmjeNpd_VIkY-7kI9LHrozhVE",
+  authDomain: "medical-simulador.firebaseapp.com",
+  databaseURL: "https://medical-simulador-default-rtdb.firebaseio.com",
+  projectId: "medical-simulador",
+  storageBucket: "medical-simulador.firebasestorage.app",
+  messagingSenderId: "715692377671",
+  appId: "1:715692377671:web:29eed6fc0d53aac2ad5362",
+  measurementId: "G-XDMP09ZWST"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+let dispData = {};
+db.ref('disponibilidade').on('value', (snapshot) => {
+  dispData = snapshot.val() || {};
+  if (document.getElementById('selAndar').value) {
+    updateUnidades();
+  }
+});
 
 function switchSimulator(sim) {
   try {
@@ -786,6 +811,9 @@ function updateUnidades(){
   if(!andar)return;
   const units=UNITS.filter(u=>u.andar===andar);
   units.forEach(u=>{
+    const simData = dispData[currentSimulator] || {};
+    const status = simData[u.unidade] || 'Disponível';
+    if(status === 'Vendido') return;
     const opt=document.createElement('option');
     opt.value=u.unidade;
     const vagasText = u.vagas ? ` – ${u.vagas} ${u.vagas === 1 ? 'vaga' : 'vagas'}` : '';
@@ -990,6 +1018,7 @@ function exportExcel(){
   XLSX.writeFile(wb,`Simulacao_${currentSimulator === 'TResidence' ? 'TIMELESS' : 'CBMC'}_${u.unidade}_${nome}.xlsx`);
 }
 </script>
+  <a href="admin.html" style="position:fixed; bottom:15px; right:15px; opacity:0.3; text-decoration:none; font-size:16px; z-index:9999;" class="no-print" title="Painel do Administrador">🔒</a>
 </body>
 </html>
 
