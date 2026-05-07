@@ -55,6 +55,7 @@
     </div>
   </div>
 
+  <script src="data.js"></script>
   <script>
     // ⚠️ COLOQUE AQUI AS CREDENCIAIS DO SEU FIREBASE ⚠️
     const firebaseConfig = {
@@ -118,8 +119,8 @@
         const tbody = document.getElementById('unitsBody');
         tbody.innerHTML = '';
         
-        // Exemplo com algumas unidades fixas para visualização se o banco estiver vazio
-        const allUnits = data && Object.keys(data).length > 0 ? Object.keys(data).sort() : ['101', '102', '103', '104', '1401', '1402']; 
+        const baseUnits = emp === 'CBMC' ? UNITS_CBMC : UNITS_TRESIDENCE;
+        const allUnits = baseUnits.map(u => u.unidade);
         
         allUnits.forEach(unidade => {
             const status = data[unidade] || 'Disponível';
