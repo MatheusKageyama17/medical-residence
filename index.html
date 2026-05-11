@@ -255,11 +255,32 @@ td,th{padding:5px 8px !important;}
       }
       
       .consol-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .consol-grid .consol-cell:last-child {
+        grid-column: span 2;
       }
       
       .unit-info.visible {
         grid-template-columns: 1fr 1fr;
+      }
+      
+      .unit-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        text-align: center;
+      }
+      
+      .unit-card-remove {
+        width: 100%;
+        margin-top: 4px;
+      }
+      
+      .unit-card-detail {
+        font-size: 11px;
+        line-height: 1.4;
       }
     }
     /* Estilo do botão de admin acessível e aparente */
