@@ -683,44 +683,58 @@ function recalcFromValue(tipo){
   if(nomeEl)nomeEl.textContent=document.getElementById('nomeProponente').value||'___________________________';
 }
 function simular(){
-  const unid=document.getElementById('selUnidade').value;
-  if(!unid){alert('Selecione uma unidade primeiro.');return;}
-  const u=UNITS.find(x=>x.unidade===unid);
-  const valor=u.valor;
   const dataInicio=document.getElementById('dataInicio').value;
   if(!dataInicio){alert('Informe a data do 1º pagamento.');return;}
-  const qS=+document.getElementById('qtdSinal').value||1;
-  const qM=+document.getElementById('qtdMensais').value||1;
-  const qI=+document.getElementById('qtdInterm').value||0;
-  const qQ=+document.getElementById('qtdQuitacao').value||1;
-  const valS=parseVal(document.getElementById('custSinal').value);
-  const valM=parseVal(document.getElementById('custMensais').value);
-  const valI=qI>0?parseVal(document.getElementById('custInterm').value):0;
-  const valQ=parseVal(document.getElementById('custQuitacao').value);
-  const rows=[];
-  for(let i=0;i<qS;i++)rows.push({date:addMonths(dataInicio,i),tipo:'sinal',label:`Sinal${qS>1?' '+(i+1)+'/'+qS:''}`,valor:valS});
-  const mensaisStart=addMonths(dataInicio,qS);
-  for(let i=0;i<qM;i++)rows.push({date:addMonths(mensaisStart,i),tipo:'mensal',label:`Mensal ${i+1}/${qM}`,valor:valM});
-  // Intermediárias fixas: 8º, 14º, 20º, 28º mês após início
-  if(qI>0){
-    const intermMonths=[8,14,20,28];
-    for(let i=0;i<Math.min(qI,intermMonths.length);i++)
-      rows.push({date:addMonths(dataInicio,intermMonths[i]-1),tipo:'interm',label:`Intermediária ${i+1}/${qI} (${intermMonths[i]}º mês)`,valor:valI});
+  
+  let unitsToSimulate = [];
+  if (_proposalUnits.length > 0) {
+    unitsToSimulate = _proposalUnits;
+  } else {
+    const unid=document.getElementById('selUnidade').value;
+    if(!unid){alert('Selecione e adicione uma unidade à proposta primeiro ou configure a unidade atual.');return;}
+    const u=UNITS.find(x=>x.unidade===unid);
+    const valS=parseVal(document.getElementById('custSinal').value);const qtdS=+document.getElementById('qtdSinal').value||1;
+    const valM=parseVal(document.getElementById('custMensais').value);const qtdM=+document.getElementById('qtdMensais').value||1;
+    const valI=parseVal(document.getElementById('custInterm').value);const qtdI=+document.getElementById('qtdInterm').value||0;
+    const valQ=parseVal(document.getElementById('custQuitacao').value);const qtdQ=+document.getElementById('qtdQuitacao').value||1;
+    unitsToSimulate = [{unidade:u.unidade,andar:u.andar,area:u.area,areaTotal:u.areaTotal,vagas:u.vagas,valorTabela:u.valor,valS,qtdS,valM,qtdM,valI,qtdI,valQ,qtdQ,totalProposta:(valS*qtdS)+(valM*qtdM)+(valI*qtdI)+(valQ*qtdQ)}];
   }
-  const quitacaoStart=addMonths(mensaisStart,qM);
-  for(let i=0;i<qQ;i++)rows.push({date:addMonths(quitacaoStart,i),tipo:'quitacao',label:`Quitação/Repasse${qQ>1?' '+(i+1)+'/'+qQ:''}`,valor:valQ});
+
+  const rows=[];
+  let total=0;
+  let totValorTabela=0;
+  let tS2=0, tM2=0, tI2=0, tQ2=0;
+
+  unitsToSimulate.forEach(pu => {
+    const {unidade, valS, qtdS, valM, qtdM, valI, qtdI, valQ, qtdQ} = pu;
+    totValorTabela += pu.valorTabela;
+    tS2 += valS*qtdS; tM2 += valM*qtdM; tI2 += valI*qtdI; tQ2 += valQ*qtdQ;
+    
+    const labelPrefix = unitsToSimulate.length > 1 ? `(Unid ${unidade}) ` : '';
+
+    for(let i=0;i<qtdS;i++) rows.push({date:addMonths(dataInicio,i),tipo:'sinal',label:`${labelPrefix}Sinal${qtdS>1?' '+(i+1)+'/'+qtdS:''}`,valor:valS});
+    const mensaisStart=addMonths(dataInicio,qtdS);
+    for(let i=0;i<qtdM;i++) rows.push({date:addMonths(mensaisStart,i),tipo:'mensal',label:`${labelPrefix}Mensal ${i+1}/${qtdM}`,valor:valM});
+    if(qtdI>0){
+      const intermMonths=[8,14,20,28];
+      for(let i=0;i<Math.min(qtdI,intermMonths.length);i++)
+        rows.push({date:addMonths(dataInicio,intermMonths[i]-1),tipo:'interm',label:`${labelPrefix}Intermediária ${i+1}/${qtdI} (${intermMonths[i]}º mês)`,valor:valI});
+    }
+    const quitacaoStart=addMonths(mensaisStart,qtdM);
+    for(let i=0;i<qtdQ;i++) rows.push({date:addMonths(quitacaoStart,i),tipo:'quitacao',label:`${labelPrefix}Quitação/Repasse${qtdQ>1?' '+(i+1)+'/'+qtdQ:''}`,valor:valQ});
+  });
+
   rows.sort((a,b)=>a.date.localeCompare(b.date));
   const tbody=document.getElementById('scheduleBody');
   tbody.innerHTML='';
-  let total=0;
   rows.forEach((r,idx)=>{
     total+=r.valor;
     const badge={sinal:'<span class="badge badge-sinal">Sinal</span>',mensal:'<span class="badge badge-mensal">Mensal</span>',interm:'<span class="badge badge-interm">Intermediária</span>',quitacao:'<span class="badge badge-quitacao">Quitação</span>'}[r.tipo];
     tbody.innerHTML+=`<tr><td>${idx+1}</td><td>${fmtDate(r.date)}</td><td>${badge} <span style="font-size:12px;color:#666">${r.label}</span></td><td class="money">${fmt(r.valor)}</td></tr>`;
   });
+  
   document.getElementById('scheduleTotal').textContent='R$ '+fmt(total);
-  const tS2=valS*qS,tM2=valM*qM,tI2=valI*qI,tQ2=valQ*qQ;
-  document.getElementById('sumValor').textContent=fmtMoney(valor);
+  document.getElementById('sumValor').textContent=fmtMoney(totValorTabela);
   document.getElementById('sumSinal').textContent=fmtMoney(tS2);
   document.getElementById('sumMensais').textContent=fmtMoney(tM2);
   document.getElementById('sumInterm').textContent=fmtMoney(tI2);
@@ -728,7 +742,9 @@ function simular(){
   document.getElementById('summaryBar').classList.add('visible');
   document.getElementById('resultSection').classList.add('visible');
   document.getElementById('summaryBar').scrollIntoView({behavior:'smooth',block:'start'});
-  window._simRows=rows;window._simUnit=u;window._simTotal=total;
+  window._simRows=rows;
+  window._simUnits=unitsToSimulate;
+  window._simTotal=total;
 }
 let _proposalUnits=[];
 function addUnitToProposal(){
@@ -740,7 +756,7 @@ function addUnitToProposal(){
   const valI=parseVal(document.getElementById('custInterm').value);const qtdI=+document.getElementById('qtdInterm').value||0;
   const valQ=parseVal(document.getElementById('custQuitacao').value);const qtdQ=+document.getElementById('qtdQuitacao').value||1;
   const totalProposta=(valS*qtdS)+(valM*qtdM)+(valI*qtdI)+(valQ*qtdQ);
-  _proposalUnits.push({unidade:u.unidade,area:u.area,areaTotal:u.areaTotal,vagas:u.vagas,valorTabela:u.valor,valS,qtdS,valM,qtdM,valI,qtdI,valQ,qtdQ,totalProposta});
+  _proposalUnits.push({unidade:u.unidade,andar:u.andar,area:u.area,areaTotal:u.areaTotal,vagas:u.vagas,valorTabela:u.valor,valS,qtdS,valM,qtdM,valI,qtdI,valQ,qtdQ,totalProposta});
   renderUnitList();updateConsolidated();
   document.getElementById('unitListSection').classList.add('visible');
 }
@@ -773,7 +789,7 @@ function updateConsolidated(){
 }
 function exportExcel(){
   if(!window._simRows){alert('Gere a simulação primeiro.');return;}
-  const u=window._simUnit;
+  const units=window._simUnits;
   const wb=XLSX.utils.book_new();
   const resumo=[
     ['SIMULAÇÃO DE COMPRA – ' + (currentSimulator === 'TResidence' ? 'TIMELESS RESIDENCE' : 'MEDICAL CBMC')],[],
@@ -783,28 +799,34 @@ function exportExcel(){
     ['E-mail:',document.getElementById('email').value],
     ['Data da Proposta:',fmtDate(document.getElementById('dataProposta').value)],[],
     ['Corretor/Imobiliária:',document.getElementById('imobiliaria').value],
-    ['Gestor:',document.getElementById('gestorHVM').value],[],
-    ['UNIDADE SELECIONADA'],
-    ['Unidade:',u.unidade],['Andar:',u.andar+'º'],
-    ['Área Privativa:',u.area+' m²'],['Área Total:',u.areaTotal+' m²'],
-    ['Vagas:',u.vagas ? u.vagas : 'Sem vaga'],['Valor Total:',u.valor],[],
-    ['RESUMO DO PAGAMENTO'],
-    ['Tipo','% do Valor','Qtd Parcelas','Valor p/ Parcela','Total'],
-    ['Sinal',document.getElementById('pctSinal').value,document.getElementById('qtdSinal').value,parseVal(document.getElementById('custSinal').value),parseVal(document.getElementById('custSinal').value)*(+document.getElementById('qtdSinal').value||1)],
-    ['Mensais (36x)',document.getElementById('pctMensais').value,document.getElementById('qtdMensais').value,parseVal(document.getElementById('custMensais').value),parseVal(document.getElementById('custMensais').value)*(+document.getElementById('qtdMensais').value||1)],
-    ['Intermediárias',document.getElementById('pctInterm').value,document.getElementById('qtdInterm').value,parseVal(document.getElementById('custInterm').value),parseVal(document.getElementById('custInterm').value)*(+document.getElementById('qtdInterm').value||0)],
-    ['Quitação/Repasse',document.getElementById('pctQuitacao').value,document.getElementById('qtdQuitacao').value,parseVal(document.getElementById('custQuitacao').value),parseVal(document.getElementById('custQuitacao').value)*(+document.getElementById('qtdQuitacao').value||1)],
-    [],[' TOTAL GERAL','','','',window._simTotal]
+    ['Gestor:',document.getElementById('gestorHVM').value],[]
   ];
-  const ws1=XLSX.utils.aoa_to_sheet(resumo);ws1['!cols']=[{wch:24},{wch:16},{wch:16},{wch:20},{wch:20}];
+
+  units.forEach(u => {
+    resumo.push(['UNIDADE ' + u.unidade]);
+    resumo.push(['Andar:', u.andar+'º', 'Área Privativa:', u.area+' m²', 'Área Total:', u.areaTotal+' m²', 'Vagas:', u.vagas ? u.vagas : 'Sem vaga', 'Valor Tabela:', u.valorTabela]);
+    resumo.push(['RESUMO DO PAGAMENTO - UNIDADE ' + u.unidade]);
+    resumo.push(['Tipo','Qtd Parcelas','Valor p/ Parcela','Total']);
+    resumo.push(['Sinal', u.qtdS, u.valS, u.valS * u.qtdS]);
+    resumo.push(['Mensais', u.qtdM, u.valM, u.valM * u.qtdM]);
+    if(u.qtdI > 0) resumo.push(['Intermediárias', u.qtdI, u.valI, u.valI * u.qtdI]);
+    resumo.push(['Quitação/Repasse', u.qtdQ, u.valQ, u.valQ * u.qtdQ]);
+    resumo.push(['Total Proposta Unidade ' + u.unidade, '', '', u.totalProposta]);
+    resumo.push([]);
+  });
+
+  resumo.push(['TOTAL GERAL PROPOSTA (' + units.length + ' unidades)','','','', window._simTotal]);
+
+  const ws1=XLSX.utils.aoa_to_sheet(resumo);ws1['!cols']=[{wch:26},{wch:16},{wch:16},{wch:20},{wch:20}];
   XLSX.utils.book_append_sheet(wb,ws1,'Resumo');
   const fluxo=[['#','Data','Tipo','Descrição','Valor (R$)']];
   window._simRows.forEach((r,i)=>{fluxo.push([i+1,fmtDate(r.date),{sinal:'Sinal',mensal:'Mensal',interm:'Intermediária',quitacao:'Quitação/Repasse'}[r.tipo],r.label,r.valor]);});
   fluxo.push([]);fluxo.push(['','','','TOTAL',window._simTotal]);
-  const ws2=XLSX.utils.aoa_to_sheet(fluxo);ws2['!cols']=[{wch:5},{wch:14},{wch:18},{wch:26},{wch:18}];
+  const ws2=XLSX.utils.aoa_to_sheet(fluxo);ws2['!cols']=[{wch:5},{wch:14},{wch:18},{wch:30},{wch:18}];
   XLSX.utils.book_append_sheet(wb,ws2,'Fluxo de Pagamento');
   const nome=(document.getElementById('nomeProponente').value||'simulacao').replace(/\s+/g,'_');
-  XLSX.writeFile(wb,`Simulacao_${currentSimulator === 'TResidence' ? 'TIMELESS' : 'CBMC'}_${u.unidade}_${nome}.xlsx`);
+  const unids=units.map(u=>u.unidade).join('-');
+  XLSX.writeFile(wb,`Simulacao_${currentSimulator === 'TResidence' ? 'TIMELESS' : 'CBMC'}_${unids}_${nome}.xlsx`);
 }
 </script>
   <a href="admin.html" class="admin-shortcut no-print" title="Painel do Administrador">
