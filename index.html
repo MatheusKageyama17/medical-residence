@@ -491,6 +491,14 @@ td,th{padding:5px 8px !important;}
       <tfoot><tr id="consolPrintFoot"></tr></tfoot>
     </table>
   </div>
+  <div class="print-only" id="printScheduleSection" style="display:none">
+    <h3 style="background:#2C3E7A;color:white;padding:8px 14px;font-size:13px;border-radius:6px 6px 0 0;margin-top:18px;">Fluxo de Pagamento Consolidado</h3>
+    <table id="printScheduleTable">
+      <thead><tr><th>#</th><th>Data</th><th>Tipo</th><th>Descrição</th><th style="text-align:right">Valor (R$)</th></tr></thead>
+      <tbody id="printScheduleBody"></tbody>
+      <tfoot><tr><td colspan="4"><strong>Total Geral</strong></td><td class="money" id="printScheduleTotal">–</td></tr></tfoot>
+    </table>
+  </div>
   <div class="summary-bar" id="summaryBar">
     <div class="summary-item"><span>Valor da Unidade</span><strong id="sumValor">–</strong></div>
     <div class="summary-item"><span>Sinal</span><strong id="sumSinal">–</strong></div>
@@ -766,6 +774,18 @@ function simular(){
   window._simRows=rows;
   window._simUnits=unitsToSimulate;
   window._simTotal=total;
+
+  // Also populate print-only schedule section
+  const printBody = document.getElementById('printScheduleBody');
+  if (printBody) {
+    printBody.innerHTML = '';
+    rows.forEach((r, idx) => {
+      const typeLabel = {sinal:'Sinal', mensal:'Mensal', interm:'Intermediária', quitacao:'Quitação/Repasse'}[r.tipo];
+      printBody.innerHTML += `<tr><td>${idx+1}</td><td>${fmtDate(r.date)}</td><td>${typeLabel}</td><td>${r.label}</td><td class="money">${fmt(r.valor)}</td></tr>`;
+    });
+    document.getElementById('printScheduleTotal').textContent = 'R$ ' + fmt(total);
+    document.getElementById('printScheduleSection').style.display = 'block';
+  }
 }
 let _proposalUnits=[];
 function addUnitToProposal(){
