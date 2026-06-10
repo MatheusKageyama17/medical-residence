@@ -450,12 +450,16 @@ td,th{padding:5px 8px !important;}
         </div>
       </div>
       <div id="pctWarning" style="display:none;margin-top:10px;padding:8px 12px;background:#FFF3CD;border-left:4px solid #F59E0B;border-radius:4px;font-size:12px;color:#92400E;font-weight:600;"></div>
-      <div class="live-total-bar" id="liveTotalBar">
+      <div style="margin-top:14px;padding:12px 16px;background:#EBF2FF;border:1.5px solid var(--primary);border-radius:8px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:700;color:var(--primary);white-space:nowrap;">📅 Data do 1º Pagamento (Início das Parcelas)</span>
+        <input type="date" id="dataInicio" style="border:1.5px solid var(--primary);border-radius:6px;padding:7px 12px;font-size:14px;font-weight:600;color:var(--text-primary);background:white;outline:none;cursor:pointer;">
+        <span style="font-size:11px;color:#4A5575;font-style:italic;">Escolha a data que o cliente deseja iniciar os pagamentos</span>
+      </div>
+      <div class="live-total-bar" id="liveTotalBar" style="margin-top:12px;">
         <div class="live-total-cell highlight"><span>💰 Total da Proposta</span><strong id="liveTotalProposta">R$ 0,00</strong></div>
         <div class="live-total-cell"><span>🏠 Valor da Unidade</span><strong id="liveTotalUnidade">–</strong></div>
         <div class="live-total-cell" id="liveDiffCell"><span id="liveDiffLabel">Diferença</span><strong id="liveDiff">–</strong></div>
       </div>
-      <input type="date" id="dataInicio" style="display:none">
     </div>
   </div>
   <div class="print-total-bar" style="display:none" id="printTotalBar">
