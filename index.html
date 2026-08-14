@@ -631,7 +631,7 @@ function updateUnidades(){
   selU.disabled=!andar;
   document.getElementById('unitInfo').classList.remove('visible');
   if(!andar)return;
-  const units=UNITS.filter(u=>u.andar===andar);
+  const units=UNITS.filter(u=>u.andar==andar);
   units.forEach(u=>{
     const simData = dispData[currentSimulator] || {};
     const status = simData[u.unidade] || 'Disponível';
